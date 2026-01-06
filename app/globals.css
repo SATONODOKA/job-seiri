@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 背景: 柔らかいライトグレー */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  
+  /* カード: 白 */
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  
+  /* テキスト */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  
+  /* アクセント: ブルー系 */
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+  
+  /* ステータスバッジ */
+  --badge-new: #10b981;
+  --badge-reviewing: #f59e0b;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
