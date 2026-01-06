@@ -11,8 +11,6 @@ interface JobCardProps {
 
 export default function JobCard({ job }: JobCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [memo, setMemo] = useState(job.memo || "");
-  const [isSavingMemo, setIsSavingMemo] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const formatDate = (date: Date | null) => {
@@ -32,20 +30,6 @@ export default function JobCard({ job }: JobCardProps) {
     }
   };
 
-  const handleSaveMemo = async () => {
-    setIsSavingMemo(true);
-    try {
-      await updateDoc(doc(db, "jobs", job.id), {
-        memo: memo,
-      });
-    } catch (error) {
-      console.error("メモ保存エラー:", error);
-      alert("メモの保存に失敗しました");
-    } finally {
-      setIsSavingMemo(false);
-    }
-  };
-
   const handleDelete = async () => {
     if (!confirm("本当に削除しますか？")) return;
 
@@ -61,10 +45,14 @@ export default function JobCard({ job }: JobCardProps) {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={isExpanded}
       className={`bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
         isExpanded ? "ring-2 ring-blue-400" : ""
       }`}
       onClick={() => setIsExpanded(!isExpanded)}
+      onKeyDown={(e) => e.key === "Enter" && setIsExpanded(!isExpanded)}
     >
       <div className="p-4">
         <div className="flex items-center justify-between">
@@ -88,22 +76,13 @@ export default function JobCard({ job }: JobCardProps) {
           className="px-4 pb-4 pt-2 border-t border-slate-100"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* メモ */}
-          <div className="mb-4">
-            <label className="text-sm font-medium text-slate-600 mb-1 block">メモ</label>
-            <textarea
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              onBlur={handleSaveMemo}
-              placeholder="メモを入力..."
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none"
-              rows={2}
-              disabled={isSavingMemo}
-            />
-            {isSavingMemo && (
-              <p className="text-xs text-slate-400 mt-1">保存中...</p>
-            )}
+          {/* 求人内容表示エリア */}
+          <div className="mb-4 max-h-80 overflow-y-auto">
+            <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
+              {job.content || "内容なし"}
+            </p>
           </div>
+          
           {/* ボタン */}
           <div className="flex gap-2">
             <a
@@ -117,9 +96,9 @@ export default function JobCard({ job }: JobCardProps) {
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="py-2 px-4 text-red-500 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="py-2 px-4 text-red-500 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors"
             >
-              {isDeleting ? "削除中..." : "削除"}
+              {isDeleting ? "..." : "削除"}
             </button>
           </div>
         </div>

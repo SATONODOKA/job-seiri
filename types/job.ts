@@ -2,7 +2,7 @@ export interface Job {
   id: string;
   url: string;
   title: string;
-  memo: string;
+  content: string;
   createdAt: Date | null;
 }
 

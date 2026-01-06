@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Job Seiri",
+  "version": "1.0",
+  "description": "求人ページをワンクリックで保存",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

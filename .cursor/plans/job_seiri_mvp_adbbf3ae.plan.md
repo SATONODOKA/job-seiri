@@ -1,322 +1,231 @@
 ---
 name: Job Seiri MVP
-overview: 求人ページをワンクリックで保存し、1ページの一覧で後からまとめて読み返せる「自分専用ジョブブックマーク」を作る。AIマッチングは後回し。
+overview: 求人ページをワンクリックで保存し、1ページの一覧で後からまとめて読み返せる「自分専用ジョブブックマーク」
 todos:
-  - id: fix-env
-    content: .env.local作成 + devサーバー再起動
-    status: pending
-  - id: fix-ui
-    content: UIデザイン刷新（参考サイトの特徴を反映）
+  - id: task1-ui
+    content: UI整理（メモ欄削除、タイトル入力削除、求人内容表示追加）
+    status: completed
+  - id: task2-mock
+    content: モックJSONでFirestoreにデータ投入、表示確認
+    status: completed
+  - id: task3-extension
+    content: Chrome拡張機能の基本実装
+    status: completed
+  - id: task4-extension-fix
+    content: Chrome拡張機能を任意のURLで動作するよう修正
     status: pending
     dependencies:
-      - fix-env
-  - id: verify
-    content: 動作検証（保存、一覧表示、展開、削除）
-    status: pending
-    dependencies:
-      - fix-ui
+      - task3-extension
 ---
 
 # Job Seiri - 修正プラン
 
+---
+
 ## 完了済み
 
-- [x] Next.jsプロジェクト作成
-- [x] Firebase SDK インストール
-- [x] lib/firebase.ts作成
-- [x] types/job.ts作成
-- [x] components/JobInputForm.tsx作成
-- [x] components/JobList.tsx作成
-- [x] components/JobCard.tsx作成（展開/折りたたみUI）
-- [x] Firestoreセキュリティルール設定（Firebase Console）
+- [x] タスク1: UI整理（メモ→content表示）
+- [x] タスク2: モックデータでFirestore動作確認
+- [x] タスク3: Chrome拡張機能の基本実装
 
 ---
 
-## 残り修正タスク
+## タスク4: Chrome拡張機能を任意のURLで動作させる
 
-### タスク1: `.env.local`作成（必須）
+### 問題点
 
-**ファイル:** プロジェクトルートに `.env.local` を作成
+現状の拡張機能は以下の問題がある:
 
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyDFKthKGygKrqQ2n1MYoSpDJAouHwRp-eY
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=job-seiri.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=job-seiri
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=job-seiri.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=506993669324
-NEXT_PUBLIC_FIREBASE_APP_ID=1:506993669324:web:693e485bcd9a546aefbe69
-```
+1. **content_scriptsが注入されていない場合がある**
 
-**作成後、devサーバー再起動必須**
+- 拡張機能インストール前に開いていたタブでは動かない
+- ページをリロードしないとcontent.jsが読み込まれない
 
-```bash
-# Ctrl+C で停止後
-npm run dev
-```
+2. **chrome.tabs.sendMessageが失敗する**
+
+- content scriptが動いていないタブにメッセージを送るとエラー
+
+### 解決策
+
+**`chrome.scripting.executeScript`を使って、ボタンクリック時に動的にスクリプトを実行する**これなら:
+
+- 拡張機能インストール前に開いていたページでも動く
+- リロード不要
+- 確実にスクリプトが実行される
 
 ---
 
-### タスク2: UIデザイン刷新
+### 4-1. manifest.json を更新
 
-#### 参考サイト
+**ファイル:** `chrome-extension/manifest.json`**変更内容:** permissionsに`scripting`を追加、`host_permissions`を追加、`content_scripts`は削除
 
-https://dribbble.com/shots/19382619-Contacts-list-details
+```json
+{
+  "manifest_version": 3,
+  "name": "Job Seiri",
+  "version": "1.0",
+  "description": "求人ページをワンクリックで保存",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
+```
 
-#### 参考サイトのデザイン分析
+**削除するもの:**
 
-| 要素 | 参考サイトの特徴 ||------|------------------|| **背景** | ライトグレー `#f5f5f5` くらいの柔らかい色 || **カード** | 白背景、軽いシャドウ、角丸12px程度 || **テキスト** | メイン: ダークグレー `#1f2937`、サブ: グレー `#6b7280` || **アクセント** | グリーン系バッジ（ステータス表示） || **リストアイテム** | コンパクト、アバター+名前+ステータス+日時 || **余白** | 適切な余白、詰め込みすぎない || **フォント** | サンセリフ、ウェイトで強弱をつける || **全体の雰囲気** | クリーン、プロフェッショナル、余白を活かす |
+- `content_scripts` ブロック全体（動的注入に切り替えるため不要）
 
-#### 適用方針
+---
 
-現状のダークモードを**ライトモード**に変更し、参考サイトのクリーンな雰囲気を再現する。---
+### 4-2. content.js を削除
 
-#### 2-1. フォント導入
+**ファイル:** `chrome-extension/content.js`**変更内容:** このファイルは削除する（popup.jsから直接スクリプトを実行するため）---
 
-**修正ファイル:** `app/layout.tsx`
+### 4-3. popup.js を全面書き換え
 
-```typescript
-import { Noto_Sans_JP, Inter } from 'next/font/google';
+**ファイル:** `chrome-extension/popup.js`**変更内容:** chrome.scripting.executeScriptを使って動的にページ情報を取得
 
-const notoSansJP = Noto_Sans_JP({ 
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-sans-jp',
+```javascript
+// Firebase設定
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDFKthKGygKrqQ2n1MYoSpDJAouHwRp-eY",
+  authDomain: "job-seiri.firebaseapp.com",
+  projectId: "job-seiri",
+  storageBucket: "job-seiri.firebasestorage.app",
+  messagingSenderId: "506993669324",
+  appId: "1:506993669324:web:693e485bcd9a546aefbe69"
+};
+
+// ページ情報を取得する関数（タブ内で実行される）
+function getPageInfo() {
+  // メインコンテンツを探す
+  const main = document.querySelector('main') 
+    || document.querySelector('article')
+    || document.querySelector('[class*="job"]')
+    || document.querySelector('[class*="content"]')
+    || document.querySelector('[class*="description"]')
+    || document.body;
+  
+  const content = main.innerText.trim().substring(0, 10000);
+  
+  return {
+    url: window.location.href,
+    title: document.title,
+    content: content
+  };
+}
+
+// Firestore REST APIで保存
+async function saveToFirestore(data) {
+  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/jobs`;
+  
+  const body = {
+    fields: {
+      url: { stringValue: data.url },
+      title: { stringValue: data.title },
+      content: { stringValue: data.content },
+      createdAt: { timestampValue: new Date().toISOString() }
+    }
+  };
+  
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Firestore error:", errorText);
+    throw new Error("保存に失敗しました");
+  }
+  return response.json();
+}
+
+// 保存ボタン
+document.getElementById("saveBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("saveBtn");
+  const status = document.getElementById("status");
+  
+  btn.disabled = true;
+  btn.textContent = "保存中...";
+  status.textContent = "";
+  status.className = "";
+  
+  try {
+    // 現在のタブを取得
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    // chrome://やedge://などの特殊ページでは動作しない
+    if (tab.url.startsWith("chrome://") || tab.url.startsWith("edge://") || tab.url.startsWith("about:")) {
+      throw new Error("このページでは使用できません");
+    }
+    
+    // ページ内でスクリプトを実行してページ情報を取得
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: getPageInfo
+    });
+    
+    if (!results || results.length === 0 || !results[0].result) {
+      throw new Error("ページ情報を取得できませんでした");
+    }
+    
+    const pageInfo = results[0].result;
+    
+    // Firestoreに保存
+    await saveToFirestore(pageInfo);
+    
+    status.textContent = "保存しました!";
+  } catch (error) {
+    console.error(error);
+    status.textContent = "エラー: " + error.message;
+    status.className = "error";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "この求人を保存";
+  }
 });
-
-const inter = Inter({ 
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
-});
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="ja">
-      <body className={`${notoSansJP.variable} ${inter.variable} font-sans antialiased`}>
-        {children}
-      </body>
-    </html>
-  );
-}
-```
-
-**tailwind.config.ts** にフォント設定追加:
-
-```typescript
-fontFamily: {
-  sans: ['var(--font-inter)', 'var(--font-noto-sans-jp)', 'sans-serif'],
-},
 ```
 
 ---
 
-#### 2-2. カラーパレット（ライトモード）
+### 4-4. 拡張機能の再読み込み
 
-**修正ファイル:** `app/globals.css`
+修正後、Chromeで拡張機能を再読み込み:
 
-```css
-:root {
-  /* 背景: 柔らかいライトグレー */
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
-  
-  /* カード: 白 */
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --card-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-  
-  /* テキスト */
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  
-  /* アクセント: ブルー系 */
-  --accent-primary: #3b82f6;
-  --accent-primary-hover: #2563eb;
-  
-  /* ステータスバッジ */
-  --badge-new: #10b981;
-  --badge-reviewing: #f59e0b;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-}
-```
+1. `chrome://extensions/` を開く
+2. Job Seiri の「更新」ボタン（リロードアイコン）をクリック
+3. **ページのリロードは不要！** そのまま拡張機能ボタンをクリックして動作確認
 
 ---
 
-#### 2-3. 全体レイアウト
+### 4-5. テスト対象URL
 
-**修正ファイル:** `app/page.tsx`
+以下のサイトでテストして動作確認:| サイト | URL例 ||--------|-------|| SmartHR | https://open.talentio.com/r/1/c/smarthr/pages/117648 || HERP Career | https://herp.careers/ 配下 || Wantedly | https://www.wantedly.com/projects/xxxxx || Green | https://www.green-japan.com/job/xxxxx || Indeed | https://jp.indeed.com/viewjob?jk=xxxxx |---
 
-```tsx
-export default function Home() {
-  return (
-    <main className="min-h-screen bg-slate-50 py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* ヘッダー */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-800">Job Seiri</h1>
-          <p className="text-slate-500 text-sm mt-1">求人ブックマーク</p>
-        </div>
+## Composerへの指示まとめ
 
-        {/* 入力フォーム */}
-        <div className="mb-8">
-          <JobInputForm />
-        </div>
+### タスク4でやること
 
-        {/* 一覧 */}
-        <div>
-          <h2 className="text-lg font-semibold text-slate-700 mb-4">保存した求人</h2>
-          <JobList />
-        </div>
-      </div>
-    </main>
-  );
-}
-```
+| ファイル | 変更内容 ||----------|----------|| `chrome-extension/manifest.json` | `content_scripts`削除、`host_permissions`追加 || `chrome-extension/content.js` | **削除** || `chrome-extension/popup.js` | 全面書き換え（`chrome.scripting.executeScript`を使用） |
 
----
+### 変更後の動作
 
-#### 2-4. カードデザイン
-
-**修正ファイル:** `components/JobCard.tsx`参考サイトの特徴:
-
-- 白背景
-- 軽いシャドウ（控えめ）
-- 角丸12px
-- ホバーでシャドウが少し強くなる
-- 選択時にボーダーハイライト
-```tsx
-// 閉じた状態
-<div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
-  <div className="p-4">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <span className="text-slate-400">{isExpanded ? "▼" : "▶"}</span>
-        <div>
-          <h3 className="font-semibold text-slate-800">{job.title}</h3>
-          <p className="text-sm text-slate-500">{getDomain(job.url)}</p>
-        </div>
-      </div>
-      <span className="text-xs text-slate-400">{formatDate(job.createdAt)}</span>
-    </div>
-  </div>
-</div>
-
-// 展開時の追加部分
-{isExpanded && (
-  <div className="px-4 pb-4 pt-2 border-t border-slate-100">
-    {/* メモ */}
-    <div className="mb-4">
-      <label className="text-sm font-medium text-slate-600 mb-1 block">メモ</label>
-      <textarea 
-        className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none"
-        rows={2}
-      />
-    </div>
-    {/* ボタン */}
-    <div className="flex gap-2">
-      <a className="flex-1 text-center py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
-        元ページを開く
-      </a>
-      <button className="py-2 px-4 text-red-500 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors">
-        削除
-      </button>
-    </div>
-  </div>
-)}
-```
-
-
----
-
-#### 2-5. 入力フォーム
-
-**修正ファイル:** `components/JobInputForm.tsx`
-
-```tsx
-<div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-  <h2 className="text-lg font-semibold text-slate-800 mb-4">新しい求人を追加</h2>
-  <form className="space-y-4">
-    <div>
-      <label className="block text-sm font-medium text-slate-600 mb-1">URL</label>
-      <input
-        type="text"
-        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
-        placeholder="https://example.com/jobs/123"
-      />
-    </div>
-    <div>
-      <label className="block text-sm font-medium text-slate-600 mb-1">タイトル（任意）</label>
-      <input
-        type="text"
-        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
-        placeholder="フロントエンドエンジニア - 株式会社XX"
-      />
-    </div>
-    <button
-      type="submit"
-      className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors shadow-sm"
-    >
-      保存
-    </button>
-  </form>
-</div>
-```
-
----
-
-#### 2-6. 空状態・ローディング
-
-```tsx
-// 空状態
-<div className="text-center py-12">
-  <p className="text-slate-400">まだ求人が登録されていません</p>
-</div>
-
-// ローディング
-<div className="text-center py-12">
-  <p className="text-slate-400">読み込み中...</p>
-</div>
-
-// 成功メッセージ
-<div className="p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
-  保存しました
-</div>
-
-// エラーメッセージ
-<div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-  エラーが発生しました
-</div>
-```
-
----
-
-### タスク3: 動作検証
-
-修正完了後、以下を確認:
-
-- [ ] URLを入力して保存できる
-- [ ] 一覧に表示される
-- [ ] 展開/折りたたみが動く
-- [ ] メモが保存される
-- [ ] 削除できる
-- [ ] ページリロード後もデータが残る
-- [ ] デザインが参考サイトの雰囲気に近い（ライトモード、クリーン、余白）
+1. 任意のWebページを開く
+2. 拡張機能ボタンをクリック
+3. 「この求人を保存」をクリック
+4. `chrome.scripting.executeScript`でページ情報を動的に取得
+5. Firestoreに保存
+6. Webアプリの一覧に表示される
 
 ---
 
 ## 次のPhase（後回し）
 
-### Phase 3: Chrome拡張
-
-- Manifest V3でボタン押下時に現在タブ情報を取得
-- Firestoreに直接書き込み
-
-### Phase 4: AIマッチング
+### Phase 5: AIマッチング
 
 - 職務経歴書アップロード
+- 「マッチ度計算」ボタン
