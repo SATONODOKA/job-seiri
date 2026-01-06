@@ -228,4 +228,3 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 ### Phase 5: AIマッチング
 
 - 職務経歴書アップロード
-- 「マッチ度計算」ボタン
