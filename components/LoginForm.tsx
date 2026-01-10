@@ -16,13 +16,20 @@ export default function LoginForm() {
     setError("");
     setIsLoading(true);
 
+    console.log("Login attempt:", { email, isSignUp });
+
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        console.log("Creating user...");
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        console.log("User created:", result.user.uid);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        console.log("Signing in...");
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        console.log("User signed in:", result.user.uid);
       }
     } catch (err: unknown) {
+      console.error("Auth error:", err);
       const errorMessage = err instanceof Error ? err.message : "エラーが発生しました";
       if (errorMessage.includes("invalid-credential")) {
         setError("メールアドレスまたはパスワードが正しくありません");
@@ -110,4 +117,5 @@ export default function LoginForm() {
     </div>
   );
 }
+
 

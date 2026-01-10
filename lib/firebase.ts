@@ -11,7 +11,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// デバッグ: Firebase設定を確認
+console.log("Firebase Config:", firebaseConfig);
+
 // 重複初期化を防ぐ
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+console.log("Firebase App initialized:", app.name);
+
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+console.log("Firebase Auth initialized");
