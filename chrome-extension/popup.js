@@ -1,5 +1,6 @@
 // Firebase設定
-const FIREBASE_CONFIG = window.FIREBASE_CONFIG;
+// config.jsで定義された FIREBASE_CONFIG を利用可能ですが、
+// APIルート経由に変更したため、ここでは直接使用しません。
 
 // ページ情報を取得する関数（タブ内で実行される）
 function getPageInfo() {
