@@ -24,7 +24,6 @@ function getPageInfo() {
 // Firestore REST APIで保存
 async function saveToFirestore(data) {
   // Next.js APIルートを呼び出す
-  // Next.js APIルートを呼び出す
   // 本番環境のURL（開発時はlocalhostに書き換えてください）
   const API_URL = "https://job-seiri.netlify.app/api/jobs/capture";
 
