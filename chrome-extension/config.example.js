@@ -14,7 +14,8 @@ const FIREBASE_CONFIG = {
 // API URL設定
 // 開発環境: http://localhost:3001/api/jobs/capture
 // 本番環境: https://job-seiri.netlify.app/api/jobs/capture
-const API_URL = "http://localhost:3001/api/jobs/capture";
+// 注意: 本番環境で使用する場合は、Netlifyの実際のURLに変更してください
+const API_URL = "https://job-seiri.netlify.app/api/jobs/capture";
 
 // グローバル変数としてエクスポート(Chrome拡張機能用)
 if (typeof window !== 'undefined') {

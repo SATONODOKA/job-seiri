@@ -1,9 +1,11 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+  # Next.jsの場合は、@netlify/plugin-nextjsが自動的に出力ディレクトリを設定します
+  # publishディレクトリはプラグインが自動設定するため、明示的に指定しない
 
 [build.environment]
   NODE_VERSION = "18"
+  NEXT_TELEMETRY_DISABLED = "1"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
