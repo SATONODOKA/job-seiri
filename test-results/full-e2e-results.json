@@ -1,0 +1,162 @@
+{
+  "login": {
+    "success": true,
+    "error": null
+  },
+  "jobListDisplay": {
+    "success": true,
+    "error": null,
+    "count": 35
+  },
+  "companyNameDisplay": {
+    "success": true,
+    "error": null,
+    "details": [
+      {
+        "index": 2,
+        "title": "株式会社マネーフォワード：プロダクトデザイナー（UI/UX）",
+        "hasCompanyName": true
+      },
+      {
+        "index": 3,
+        "title": "合同会社デロイト トーマツ：コンサルティング",
+        "hasCompanyName": true
+      },
+      {
+        "index": 4,
+        "title": "エンジニアリング基盤本部：データアナリスト",
+        "hasCompanyName": true
+      },
+      {
+        "index": 5,
+        "title": "戦略コンサルタント募集：| マネジメントコンサルティング",
+        "hasCompanyName": true
+      },
+      {
+        "index": 6,
+        "title": "カスタマーサクセスマネージャー：| HRテック企業",
+        "hasCompanyName": true
+      },
+      {
+        "index": 7,
+        "title": "株式会社テックスタート：法人営業マネージャー募集",
+        "hasCompanyName": true
+      },
+      {
+        "index": 8,
+        "title": "出向先：株式会社：【住宅業界出身者活躍中！】SUUMOカウンタースタッフ",
+        "hasCompanyName": true
+      },
+      {
+        "index": 9,
+        "title": "株式会社リクルート／【住宅業界出身者活躍中！】SUUMOカウンタースタッフ/研修制度◎/100％反響/残業25H〈SC〉の求人情報：【住宅業界出身者活躍中！】SUUMOカウンタースタッフ",
+        "hasCompanyName": true
+      }
+    ]
+  },
+  "salaryBandDisplay": {
+    "success": true,
+    "error": null,
+    "details": [
+      {
+        "index": 0,
+        "salaryBand": "なし",
+        "hasSalaryBand": false
+      },
+      {
+        "index": 1,
+        "salaryBand": "なし",
+        "hasSalaryBand": false
+      },
+      {
+        "index": 2,
+        "salaryBand": "900万円以上",
+        "hasSalaryBand": true
+      },
+      {
+        "index": 3,
+        "salaryBand": "なし",
+        "hasSalaryBand": false
+      },
+      {
+        "index": 4,
+        "salaryBand": "900万円以上",
+        "hasSalaryBand": true
+      },
+      {
+        "index": 5,
+        "salaryBand": "900万円以上",
+        "hasSalaryBand": true
+      },
+      {
+        "index": 6,
+        "salaryBand": "900万円以上",
+        "hasSalaryBand": true
+      },
+      {
+        "index": 7,
+        "salaryBand": "700-900万円",
+        "hasSalaryBand": true
+      },
+      {
+        "index": 8,
+        "salaryBand": "〜500万円",
+        "hasSalaryBand": true
+      },
+      {
+        "index": 9,
+        "salaryBand": "〜500万円",
+        "hasSalaryBand": true
+      }
+    ]
+  },
+  "urlValidation": {
+    "success": false,
+    "error": null,
+    "details": [
+      {
+        "index": 0,
+        "url": "なし",
+        "isValid": false,
+        "hasDisabledButton": false
+      },
+      {
+        "index": 1,
+        "url": "なし",
+        "isValid": false,
+        "hasDisabledButton": false
+      },
+      {
+        "index": 2,
+        "url": "https://moneyforward.com/careers/product-designer",
+        "isValid": true
+      },
+      {
+        "index": 3,
+        "url": "https://deloitte.com/jobs/consulting",
+        "isValid": true
+      },
+      {
+        "index": 4,
+        "url": "https://herp.careers/v1/freee/jobs/analytics",
+        "isValid": true
+      }
+    ]
+  },
+  "linkClick": {
+    "success": true,
+    "error": null,
+    "details": [
+      {
+        "expectedUrl": "https://moneyforward.com/careers/product-designer",
+        "actualUrl": "https://moneyforward.com/careers/product-designer",
+        "opened": true
+      }
+    ]
+  },
+  "overall": {
+    "success": true,
+    "score": 5,
+    "total": 6
+  }
+}

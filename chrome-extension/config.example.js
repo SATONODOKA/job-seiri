@@ -11,7 +11,13 @@ const FIREBASE_CONFIG = {
   appId: "YOUR_FIREBASE_APP_ID"
 };
 
+// API URL設定
+// 開発環境: http://localhost:3001/api/jobs/capture
+// 本番環境: https://job-seiri.netlify.app/api/jobs/capture
+const API_URL = "http://localhost:3001/api/jobs/capture";
+
 // グローバル変数としてエクスポート(Chrome拡張機能用)
 if (typeof window !== 'undefined') {
   window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+  window.API_URL = API_URL;
 }
