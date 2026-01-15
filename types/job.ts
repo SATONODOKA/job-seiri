@@ -15,5 +15,10 @@ export interface Job {
   requiredPerson: string | null;
   jobType: string | null;
   industry: string | null;
+  locationText: string | null;
+  remoteType: "onsite" | "hybrid" | "remote" | "unknown";
+  employmentType: "full_time" | "contract" | "temporary" | "intern" | "other" | null;
+  requiredYears: number | null;
+  seniorityLevel: "junior" | "mid" | "senior" | "manager" | null;
 }
 

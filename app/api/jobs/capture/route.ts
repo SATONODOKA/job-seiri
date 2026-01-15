@@ -36,8 +36,11 @@ export async function POST(request: Request) {
             );
         }
 
-        // 求人情報を抽出
+        // 求人情報を抽出（パフォーマンス測定）
+        const extractionStart = Date.now();
         const extractedData = extractJobData(validatedUrl, title, content || "");
+        const extractionTime = Date.now() - extractionStart;
+        console.log(`[Performance] 抽出処理時間: ${extractionTime}ms`);
 
         // Firestoreにデータを追加
         const docRef = await addDoc(collection(db, "jobs"), {
@@ -59,6 +62,12 @@ export async function POST(request: Request) {
             requiredPerson: extractedData.requiredPerson,
             jobType: extractedData.jobType,
             industry: extractedData.industry,
+            locationText: extractedData.locationText,
+            remoteType: extractedData.remoteType,
+            employmentType: extractedData.employmentType,
+            requiredYears: extractedData.requiredYears,
+            seniorityLevel: extractedData.seniorityLevel,
+
         });
 
         const response = NextResponse.json({
