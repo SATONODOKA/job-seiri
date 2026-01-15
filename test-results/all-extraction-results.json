@@ -1,0 +1,176 @@
+[
+  {
+    "name": "SmartHR",
+    "passed": true,
+    "details": {
+      "extracted": {
+        "companyName": "SmartHR株式会社",
+        "jobTitle": "Ops企画／BizOps",
+        "salaryMin": 5880000,
+        "salaryMax": 10500000,
+        "salaryBand": "900+"
+      },
+      "expected": {
+        "companyName": "SmartHR株式会社",
+        "jobTitle": "Ops企画／BizOps",
+        "salaryMin": 5880000,
+        "salaryMax": 10500000,
+        "salaryBand": "900+"
+      },
+      "issues": [],
+      "passed": true
+    }
+  },
+  {
+    "name": "Sansan",
+    "passed": true,
+    "details": {
+      "extracted": {
+        "companyName": "Sansan株式会社",
+        "jobTitle": "エンタープライズセールス",
+        "salaryMin": 8010000,
+        "salaryMax": 15060000,
+        "salaryBand": "900+"
+      },
+      "expected": {
+        "companyName": "Sansan株式会社",
+        "jobTitle": "エンタープライズセールス",
+        "salaryMin": 8010000,
+        "salaryMax": 15060000,
+        "salaryBand": "900+"
+      },
+      "issues": [],
+      "passed": true
+    }
+  },
+  {
+    "name": "トヨタ",
+    "passed": true,
+    "details": {
+      "extracted": {
+        "companyName": "トヨタ自動車株式会社",
+        "jobTitle": "クルマを形づくるボデー部品のグローバル調達",
+        "salaryMin": 5000000,
+        "salaryMax": 16800000,
+        "salaryBand": "900+"
+      },
+      "expected": {
+        "companyName": "トヨタ自動車株式会社",
+        "jobTitle": "クルマを形づくるボデー部品のグローバル調達",
+        "salaryMin": 5000000,
+        "salaryMax": 16800000,
+        "salaryBand": "900+"
+      },
+      "issues": [],
+      "passed": true
+    }
+  },
+  {
+    "name": "楽天",
+    "passed": true,
+    "details": {
+      "extracted": {
+        "companyName": "楽天グループ株式会社",
+        "jobTitle": "デザインチームを率いるマネージャー",
+        "salaryMin": null,
+        "salaryMax": null,
+        "salaryBand": null
+      },
+      "expected": {
+        "companyName": "楽天グループ株式会社",
+        "jobTitle": "デザインチームを率いるマネージャー"
+      },
+      "issues": [],
+      "passed": true
+    }
+  },
+  {
+    "name": "ソフトバンク",
+    "passed": false,
+    "details": {
+      "extracted": {
+        "companyName": "ヘルスケアテクノロジーズ株式会社",
+        "jobTitle": "事業推進",
+        "salaryMin": 5334350,
+        "salaryMax": 9296000,
+        "salaryBand": "900+"
+      },
+      "expected": {
+        "companyName": "ヘルスケアテクノロジーズ株式会社",
+        "jobTitle": "事業推進",
+        "salaryMin": 5334350,
+        "salaryMax": 9296000,
+        "salaryBand": "500-700"
+      },
+      "issues": [
+        "年収帯: 期待値「500-700」、実際「900+」"
+      ],
+      "passed": false
+    }
+  },
+  {
+    "name": "セブンイレブン",
+    "passed": false,
+    "details": {
+      "extracted": {
+        "companyName": "株式会社セブン‐イレブン・ジャパン",
+        "jobTitle": "OFC候補）",
+        "salaryMin": 5050000,
+        "salaryMax": 6000000,
+        "salaryBand": "500-700"
+      },
+      "expected": {
+        "companyName": "株式会社セブン‐イレブン・ジャパン",
+        "jobTitle": "オペレーション・フィールド・カウンセラー OFC候補",
+        "salaryMin": 5050000,
+        "salaryMax": 6000000,
+        "salaryBand": "500-700"
+      },
+      "issues": [
+        "役職名: 期待値「オペレーション・フィールド・カウンセラー OFC候補」、実際「OFC候補）」"
+      ],
+      "passed": false
+    }
+  },
+  {
+    "name": "五洋建設",
+    "passed": true,
+    "details": {
+      "extracted": {
+        "companyName": "五洋建設株式会社",
+        "jobTitle": "建築・電気設備設計/機械設備設計",
+        "salaryMin": 6640000,
+        "salaryMax": 11420000,
+        "salaryBand": "900+"
+      },
+      "expected": {
+        "companyName": "五洋建設株式会社",
+        "jobTitle": "建築・電気設備設計/機械設備設計",
+        "salaryMin": 6640000,
+        "salaryMax": 11420000,
+        "salaryBand": "900+"
+      },
+      "issues": [],
+      "passed": true
+    }
+  },
+  {
+    "name": "NTTデータ",
+    "passed": true,
+    "details": {
+      "extracted": {
+        "companyName": "株式会社エヌ・ティ・ティ・データ",
+        "jobTitle": "業界横断_先進テクノロジーを活用するエンジニア",
+        "salaryMin": null,
+        "salaryMax": null,
+        "salaryBand": null
+      },
+      "expected": {
+        "companyName": "株式会社エヌ・ティ・ティ・データ",
+        "jobTitle": "業界横断_先進テクノロジーを活用するエンジニア"
+      },
+      "issues": [],
+      "passed": true
+    }
+  }
+]

@@ -5,6 +5,14 @@ import { extractJobData } from "@/lib/parsers/jobExtractor";
 
 export async function POST(request: Request) {
     try {
+        // Firebaseの初期化確認
+        if (!db) {
+            return NextResponse.json(
+                { error: "Firebaseが初期化されていません。環境変数を確認してください。" },
+                { status: 500 }
+            );
+        }
+
         const { jobId } = await request.json();
 
         if (jobId) {

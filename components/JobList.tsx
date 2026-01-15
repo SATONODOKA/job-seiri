@@ -22,6 +22,13 @@ export default function JobList() {
   });
 
   useEffect(() => {
+    // Firebaseの初期化確認
+    if (!db) {
+      console.error("Firebaseが初期化されていません。環境変数を確認してください。");
+      setIsLoading(false);
+      return;
+    }
+
     // リアルタイムリスナー
     const q = query(collection(db, "jobs"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(

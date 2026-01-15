@@ -18,6 +18,12 @@ export default function LoginForm() {
 
     console.log("Login attempt:", { email, isSignUp });
 
+    if (!auth) {
+      setError("Firebaseが初期化されていません。環境変数を確認してください。");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (isSignUp) {
         console.log("Creating user...");

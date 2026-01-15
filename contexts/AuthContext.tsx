@@ -21,6 +21,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      console.error("Firebase Authが初期化されていません。環境変数を確認してください。");
+      setLoading(false);
+      return;
+    }
+
     console.log("AuthProvider: Setting up auth state listener");
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log("Auth state changed:", user ? `User: ${user.uid}` : "No user");
@@ -35,6 +41,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = async () => {
+    if (!auth) {
+      console.error("Firebase Authが初期化されていません。");
+      return;
+    }
     await signOut(auth);
   };
 

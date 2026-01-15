@@ -36,6 +36,14 @@ export async function POST(request: Request) {
             );
         }
 
+        // Firebaseの初期化確認
+        if (!db) {
+            return NextResponse.json(
+                { error: "Firebaseが初期化されていません。環境変数を確認してください。" },
+                { status: 500 }
+            );
+        }
+
         // 求人情報を抽出（パフォーマンス測定）
         const extractionStart = Date.now();
         const extractedData = extractJobData(validatedUrl, title, content || "");

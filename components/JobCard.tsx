@@ -71,6 +71,11 @@ export default function JobCard({ job }: JobCardProps) {
 
   // 再抽出結果をFirestoreに自動保存（重複保存を防止）
   useEffect(() => {
+    if (!db) {
+      console.error("Firebaseが初期化されていません。環境変数を確認してください。");
+      return;
+    }
+
     if (!hasSaved && extractedData && (extractedData.companyName || extractedData.jobTitle || extractedData.salaryBand)) {
       // 再抽出結果をFirestoreに保存
       updateDoc(doc(db, "jobs", job.id), {
@@ -120,6 +125,11 @@ export default function JobCard({ job }: JobCardProps) {
 
   const handleDelete = async () => {
     if (!confirm("本当に削除しますか？")) return;
+
+    if (!db) {
+      alert("Firebaseが初期化されていません。環境変数を確認してください。");
+      return;
+    }
 
     setIsDeleting(true);
     try {
