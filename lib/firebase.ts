@@ -11,8 +11,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// 環境変数の検証（ビルド時エラーを防ぐため、実行時のみチェック）
-function validateFirebaseConfig() {
+// 環境変数の検証（警告のみ、初期化は試行する）
+function validateFirebaseConfig(): boolean {
   const requiredEnvVars = [
     'NEXT_PUBLIC_FIREBASE_API_KEY',
     'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
@@ -27,14 +27,18 @@ function validateFirebaseConfig() {
   );
 
   if (missingEnvVars.length > 0) {
-    const errorMsg = `Firebase環境変数が設定されていません: ${missingEnvVars.join(', ')}`;
+    const errorMsg = `Firebase環境変数が一部設定されていません: ${missingEnvVars.join(', ')}`;
+    // 警告のみ（初期化は試行する）
     if (typeof window !== 'undefined') {
-      console.error('❌', errorMsg);
-      console.error('ブラウザ環境では環境変数が読み込まれていません。Netlifyの環境変数設定を確認してください。');
+      console.warn('⚠️', errorMsg);
+      console.warn('ブラウザ環境では環境変数が読み込まれていない可能性があります。');
     } else {
-      console.error('❌', errorMsg);
+      console.warn('⚠️', errorMsg);
     }
-    return false;
+    // 重要な環境変数（apiKey, projectId）がない場合はfalseを返す
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY || !process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
+      return false;
+    }
   }
   return true;
 }
@@ -50,12 +54,19 @@ function initializeFirebase() {
     return { app, db: dbInstance, auth: authInstance };
   }
 
-  // 環境変数の検証
-  if (!validateFirebaseConfig()) {
-    // ビルド時にはエラーを投げない（実行時にエラーを表示）
-    if (typeof window === 'undefined') {
-      // サーバーサイド: 環境変数がない場合はnullを返す
+  // 環境変数の検証（警告のみ、初期化は試行する）
+  const hasRequiredConfig = validateFirebaseConfig();
+  
+  // 必須環境変数がない場合は初期化を試みない
+  // ただし、開発環境では環境変数がなくても動作するようにする
+  if (!hasRequiredConfig) {
+    // 開発環境では警告のみ、本番環境ではエラー
+    if (process.env.NODE_ENV === 'production') {
+      console.error('❌ Firebase初期化をスキップ: 必須環境変数（API_KEY, PROJECT_ID）が設定されていません');
       return { app: null, db: null, auth: null };
+    } else {
+      console.warn('⚠️ Firebase初期化を試行しますが、環境変数が不足しています。本番環境では設定が必要です。');
+      // 開発環境では、環境変数がなくても初期化を試みる（エラーは後で発生する）
     }
   }
 

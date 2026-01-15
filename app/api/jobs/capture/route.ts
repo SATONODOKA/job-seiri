@@ -38,8 +38,14 @@ export async function POST(request: Request) {
 
         // Firebaseの初期化確認
         if (!db) {
+            console.error("Firebase初期化エラー: db is null");
+            console.error("環境変数チェック:", {
+                hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+                hasProjectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+                hasAuthDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+            });
             return NextResponse.json(
-                { error: "Firebaseが初期化されていません。環境変数を確認してください。" },
+                { error: "Firebaseが初期化されていません。環境変数を確認してください。詳細はサーバーログを確認してください。" },
                 { status: 500 }
             );
         }
