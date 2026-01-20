@@ -124,9 +124,11 @@ export async function POST(request: Request) {
             );
         }
 
-        // Gemini API呼び出しのレート制限（5件/分）
+        // Gemini API呼び出しのレート制限（10件/分に緩和、コスト保護のため）
+        // 注意: 一気に15件保存する場合、Gemini APIの処理は順次実行されるため、
+        // 実際のAPI呼び出しは時間をかけて分散される
         const geminiRateLimitKey = `gemini:${clientId}`;
-        const geminiRateLimitResult = await checkRateLimit(geminiRateLimitKey, 5, 60000);
+        const geminiRateLimitResult = await checkRateLimit(geminiRateLimitKey, 10, 60000);
         
         if (!geminiRateLimitResult.allowed) {
             return NextResponse.json(
