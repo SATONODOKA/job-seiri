@@ -21,7 +21,7 @@
 
 #### Firebase環境変数（必須・6個）
 ```
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyDg3-q0Hn-GBitx3NscOp6hQ9Fw3LWfRzw
+NEXT_PUBLIC_FIREBASE_API_KEY=<Firebase Consoleから取得したAPIキー>
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=job-seiri.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=job-seiri
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=job-seiri.firebasestorage.app
@@ -29,10 +29,18 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=506993669324
 NEXT_PUBLIC_FIREBASE_APP_ID=1:506993669324:web:693e485bcd9a546aefbe69
 ```
 
+**⚠️ 重要**: 
+- APIキーはFirebase Console → 設定 → プロジェクトの設定 → APIキーから取得してください
+- 実際のAPIキーをこのドキュメントに記載しないでください
+
 #### Gemini API環境変数（LLM機能を使用する場合）
 ```
-GEMINI_API_KEY=AIzaSyBAkiikASl6L4gGwmGdoNk7IPw21w3xZF8
+GEMINI_API_KEY=<Google Cloud Consoleから取得したAPIキー>
 ```
+
+**⚠️ 重要**: 
+- APIキーはGoogle Cloud Console → APIとサービス → 認証情報から取得してください
+- 実際のAPIキーをこのドキュメントに記載しないでください
 
 **⚠️ 重要**: 
 - 環境変数を追加した後、**必ず新しいデプロイを実行**

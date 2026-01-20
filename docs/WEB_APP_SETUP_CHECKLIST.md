@@ -18,7 +18,7 @@
 
 **必須環境変数**:
 ```
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+NEXT_PUBLIC_FIREBASE_API_KEY=<Firebase Consoleから取得したAPIキー>
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=job-seiri.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=job-seiri
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=job-seiri.firebasestorage.app
