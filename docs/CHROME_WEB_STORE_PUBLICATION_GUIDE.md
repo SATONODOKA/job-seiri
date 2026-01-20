@@ -3,8 +3,8 @@
 ## 拡張機能の基本情報
 
 ### 1. 拡張機能名
-- **日本語**: Job Seiri
-- **英語**: Job Seiri
+- **日本語**: 求人ブックマーク
+- **英語**: Job Bookmark（または求人ブックマークのローマ字表記）
 
 ### 2. バージョン
 - **現在のバージョン**: 1.0.0
@@ -28,7 +28,7 @@ Save job postings with one click and manage job information automatically extrac
 **日本語版（推奨）:**
 
 ```
-【Job Seiri - 求人ブックマーク管理ツール】
+【求人ブックマーク】
 
 求人ページを効率的に保存・管理するためのChrome拡張機能です。
 
@@ -68,7 +68,7 @@ https://job-seiri.netlify.app/support
 **英語版:**
 
 ```
-【Job Seiri - Job Bookmark Manager】
+【求人ブックマーク - Job Bookmark】
 
 A Chrome extension for efficiently saving and managing job postings.
 
@@ -149,8 +149,8 @@ https://job-seiri.netlify.app/support
 ### 1. 基本情報
 
 #### タイトル（Name）
-- **日本語**: Job Seiri
-- **英語**: Job Seiri
+- **日本語**: 求人ブックマーク
+- **英語**: Job Bookmark（または求人ブックマークのローマ字表記）
 - **文字数制限**: 45文字以内
 
 #### カテゴリー（Category）
@@ -344,7 +344,7 @@ This extension only collects page URL, title, and content when the user clicks t
 ```json
 {
   "manifest_version": 3,
-  "name": "Job Seiri",
+   "name": "求人ブックマーク",
   "version": "1.0.1",  // バージョンを更新
   ...
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "プライバシーポリシー - Job Seiri",
-  description: "Job Seiriのプライバシーポリシー",
+  title: "プライバシーポリシー - 求人ブックマーク",
+  description: "求人ブックマークのプライバシーポリシー",
 };
 
 export default function PrivacyPolicyPage() {
@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-slate max-w-none space-y-6">
             <section>
               <p className="text-slate-600 leading-relaxed">
-                Job Seiri（以下「本サービス」）は、ユーザーのプライバシーを尊重し、個人情報の保護に努めます。
+                求人ブックマーク（以下「本サービス」）は、ユーザーのプライバシーを尊重し、個人情報の保護に努めます。
                 本プライバシーポリシーは、本サービスが収集、使用、保存する情報について説明します。
               </p>
               <p className="text-sm text-slate-500 mt-4">

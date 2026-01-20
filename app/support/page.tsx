@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "サポート - Job Seiri",
-  description: "Job Seiriのサポートページ",
+  title: "サポート - 求人ブックマーク",
+  description: "求人ブックマークのサポートページ",
 };
 
 export default function SupportPage() {

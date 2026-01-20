@@ -125,7 +125,7 @@ zip -r ../job-seiri-v1.0.0.zip . \
 
 ### 基本情報
 
-- **タイトル**: Job Seiri
+- **タイトル**: 求人ブックマーク
 - **カテゴリー**: Productivity（生産性）
 - **言語**: Japanese, English（US）
 - **地域**: すべての地域

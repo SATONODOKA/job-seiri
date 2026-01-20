@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Job Seiri - 求人ブックマーク",
+  title: "求人ブックマーク",
   description: "求人ページをワンクリックで保存し、1ページでまとめて読み返せる",
 };
 

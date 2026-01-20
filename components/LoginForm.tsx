@@ -80,8 +80,7 @@ export default function LoginForm() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-800">Job Seiri</h1>
-          <p className="text-slate-500 text-sm mt-1">求人ブックマーク</p>
+          <h1 className="text-2xl font-bold text-slate-800">求人ブックマーク</h1>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
@@ -158,7 +157,7 @@ export default function LoginForm() {
               </div>
               <div>
                 <p className="font-semibold">拡張機能を追加</p>
-                <p className="text-blue-600 mt-0.5">ブラウザに Job Seiri 拡張機能を追加します。</p>
+                <p className="text-blue-600 mt-0.5">ブラウザに 求人ブックマーク 拡張機能を追加します。</p>
               </div>
             </div>
             <div className="flex gap-3">

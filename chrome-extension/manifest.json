@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Job Seiri",
+  "name": "求人ブックマーク",
   "version": "1.0",
   "description": "求人ページをワンクリックで保存",
   "permissions": ["activeTab", "scripting", "storage"],

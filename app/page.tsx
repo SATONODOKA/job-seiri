@@ -28,8 +28,7 @@ export default function Home() {
         {/* ヘッダー */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Job Seiri</h1>
-            <p className="text-slate-500 text-sm mt-1">求人ブックマーク</p>
+            <h1 className="text-2xl font-bold text-slate-800">求人ブックマーク</h1>
           </div>
           <button
             onClick={logout}
