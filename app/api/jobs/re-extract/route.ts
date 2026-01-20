@@ -33,7 +33,7 @@ export async function POST(request: Request) {
                 jobData.url,
                 jobData.title,
                 jobData.content || "",
-                jobData.htmlStructure || null,
+                null, // htmlStructureは送信しない
                 jobData.metaTags || null
             );
 
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
                         jobData.url || "",
                         jobData.title,
                         jobData.content || "",
-                        jobData.htmlStructure || null,
+                        null, // htmlStructureは送信しない
                         jobData.metaTags || null
                     );
 

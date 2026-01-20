@@ -47,11 +47,28 @@
       border-radius: 4px;
       border: 1px solid #fecaca;
     }
+    #consent {
+      padding: 8px;
+      background: #f0f9ff;
+      border-radius: 4px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #1e40af;
+      line-height: 1.4;
+    }
+    #consent a {
+      color: #2563eb;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <h1>Job Seiri</h1>
   <button id="saveBtn">この求人を保存</button>
+  <div id="consent">
+    <p>このボタンをクリックすると、ページのURL、タイトル、本文が送信され、AIで求人情報が抽出されます。</p>
+    <p style="margin-top: 4px;"><a href="https://job-seiri.netlify.app/privacy-policy" target="_blank">プライバシーポリシー</a></p>
+  </div>
   <div id="status"></div>
   <script src="config.js"></script>
   <script src="popup.js"></script>

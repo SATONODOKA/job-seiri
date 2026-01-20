@@ -2,6 +2,77 @@
 // config.jsで定義された FIREBASE_CONFIG を利用可能ですが、
 // APIルート経由に変更したため、ここでは直接使用しません。
 
+// 優先抽出: 見出しベースでセクション分割し、重要キーワードを含むセクションを優先
+function extractWithPriority(element) {
+  const sections = [];
+  const importantKeywords = ['年収', '給与', '勤務地', '応募', '資格', '経験', '要件', '必須', '歓迎'];
+  
+  // 見出しを探す
+  const headings = element.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  
+  if (headings.length === 0) {
+    // 見出しがない場合は通常の抽出
+    return getCleanText(element);
+  }
+  
+  // 見出しごとにセクションを抽出
+  headings.forEach((heading, index) => {
+    let sectionText = '';
+    let nextHeading = headings[index + 1];
+    
+    // 現在の見出しから次の見出しまでのテキストを取得
+    let current = heading.nextSibling;
+    while (current && current !== nextHeading) {
+      if (current.nodeType === Node.ELEMENT_NODE) {
+        sectionText += getCleanText(current) + ' ';
+      } else if (current.nodeType === Node.TEXT_NODE) {
+        sectionText += current.textContent + ' ';
+      }
+      current = current.nextSibling;
+    }
+    
+    // 見出しテキストも追加
+    const headingText = getCleanText(heading);
+    sectionText = headingText + ' ' + sectionText.trim();
+    
+    // 重要キーワードの数をカウント
+    const keywordCount = importantKeywords.filter(k => sectionText.includes(k)).length;
+    const priority = keywordCount * 10 + sectionText.length; // キーワード数と長さで優先度を計算
+    
+    if (sectionText.length > 50) { // 最小50文字のセクションのみ
+      sections.push({ text: sectionText, priority });
+    }
+  });
+  
+  // 優先度順にソート
+  sections.sort((a, b) => b.priority - a.priority);
+  
+  // 上限まで優先度の高いセクションを結合
+  let result = '';
+  for (const section of sections) {
+    if (result.length + section.text.length > 20000) {
+      // 残り文字数を計算して、可能な限り追加
+      const remaining = 20000 - result.length;
+      if (remaining > 100) { // 100文字以上残っている場合のみ追加
+        result += section.text.substring(0, remaining);
+      }
+      break;
+    }
+    result += section.text + '\n\n';
+  }
+  
+  // セクションが少ない場合は、通常の抽出も追加
+  if (result.length < 5000) {
+    const fallbackText = getCleanText(element);
+    const remaining = 20000 - result.length;
+    if (remaining > 0) {
+      result += '\n\n' + fallbackText.substring(0, remaining);
+    }
+  }
+  
+  return result.trim();
+}
+
 // HTMLタグを除去してテキストのみを取得する関数
 function getCleanText(element) {
   try {
@@ -146,14 +217,25 @@ function getPageInfo() {
     // 最適な要素が見つからない場合はbodyを使用
     const contentElement = bestElement || document.body;
     
-    // クリーンなテキストを取得
+    // クリーンなテキストを取得（優先抽出方式）
     let textContent = '';
     
     try {
-      textContent = getCleanText(contentElement);
+      // 優先抽出: 見出しベースでセクション分割し、重要キーワードを含むセクションを優先
+      textContent = extractWithPriority(contentElement);
     } catch (e) {
-      console.warn('getCleanText failed, using fallback:', e);
-      textContent = (contentElement.textContent || contentElement.innerText || '').substring(0, 20000);
+      console.warn('extractWithPriority failed, using fallback:', e);
+      try {
+        textContent = getCleanText(contentElement);
+      } catch (e2) {
+        console.warn('getCleanText failed, using fallback:', e2);
+        textContent = (contentElement.textContent || contentElement.innerText || '').substring(0, 20000);
+      }
+    }
+    
+    // 文字数制限（20,000文字）
+    if (textContent.length > 20000) {
+      textContent = textContent.substring(0, 20000);
     }
     
     // メタデータを最小化（送信しない、またはog:title/og:descriptionのみ）

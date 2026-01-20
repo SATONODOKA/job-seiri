@@ -17,7 +17,7 @@ export async function POST(request: Request) {
             url,
             title,
             content || "",
-            htmlStructure || null,
+            null, // htmlStructureは送信しない
             metaTags || null
         );
 
