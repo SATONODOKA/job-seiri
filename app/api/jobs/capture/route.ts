@@ -5,6 +5,7 @@ import { extractWithGemini } from "@/lib/llm/providers/gemini";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { calculateJobPageScore } from "@/lib/jobPageDetector";
 import { safeLog } from "@/lib/safeLog";
+import { verifyIdToken } from "@/lib/firebaseAdmin";
 
 export async function OPTIONS() {
     // CORS制限（拡張機能IDを環境変数で指定）
@@ -22,30 +23,28 @@ export async function OPTIONS() {
     });
 }
 
-/**
- * 簡易トークン検証（本番ではFirebase Admin SDK推奨）
- */
-function verifyToken(token: string | null): string | null {
-    if (!token) return null;
-    
-    // 簡易トークン検証（トークン形式: "user_{userId}_{timestamp}_{hash}"）
-    try {
-        const parts = token.split('_');
-        if (parts.length !== 4 || parts[0] !== 'user') return null;
-        const userId = parts[1];
-        // タイムスタンプとハッシュの検証は省略（本番では実装要）
-        return userId;
-    } catch {
-        return null;
-    }
-}
-
 export async function POST(request: Request) {
     try {
-        // 認証チェック（簡易版: トークンベース、オプション）
+        // 注意: 拡張機能からはFirebase IDトークンを送信していないため、
+        // 一時的にanonymousとして保存する
+        // 将来的には、拡張機能側でFirebase AuthenticationのIDトークンを取得して送信する必要がある
+        
+        // Firebase IDトークンを検証してユーザーIDを取得（将来の実装用）
         const authHeader = request.headers.get("Authorization");
-        const token = authHeader?.replace("Bearer ", "") || null;
-        const userId = verifyToken(token) || "anonymous";
+        const idToken = authHeader?.replace("Bearer ", "") || null;
+        
+        let userId: string | null = null;
+        if (idToken) {
+            // Firebase IDトークンを検証
+            userId = await verifyIdToken(idToken);
+        }
+        
+        // 認証されていない場合はanonymous
+        // 注意: 拡張機能から保存されたデータはanonymousになる
+        // Webアプリ側でログインしているユーザーと紐づけるには、別の仕組みが必要
+        if (!userId) {
+            userId = "anonymous";
+        }
 
         // レート制限チェック（IPベースまたはユーザーIDベース）
         const clientId = userId !== "anonymous"
