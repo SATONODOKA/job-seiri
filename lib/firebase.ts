@@ -109,16 +109,14 @@ function initializeFirebase() {
   return { app, db: dbInstance, auth: authInstance };
 }
 
-// 初期化を実行（サーバーサイドでは遅延初期化）
+// 初期化を実行（サーバーサイドとクライアントサイドの両方で初期化）
 let initializedDb: Firestore | null = null;
 let initializedAuth: Auth | null = null;
 
-// サーバーサイドでは初期化をスキップ（クライアントサイドでのみ初期化）
-if (typeof window !== 'undefined') {
-  const result = initializeFirebase();
-  initializedDb = result.db;
-  initializedAuth = result.auth;
-}
+// サーバーサイドとクライアントサイドの両方で初期化を試行
+const result = initializeFirebase();
+initializedDb = result.db;
+initializedAuth = result.auth;
 
 // エクスポート（nullの可能性があるため、使用時にチェックが必要）
 export const db: Firestore | null = initializedDb;
