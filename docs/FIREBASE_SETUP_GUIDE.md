@@ -65,13 +65,25 @@ service cloud.firestore {
     
     // jobs コレクション（求人データ）
     match /jobs/{jobId} {
-      // 認証済みユーザーは自分のデータを読み書き可能
-      allow read, write: if request.auth != null && 
-        (resource == null || resource.data.userId == request.auth.uid);
+      // 読み取り: 認証済みユーザーは自分のデータ、またはanonymous/未設定のデータも読み取り可能
+      allow read: if request.auth != null && 
+                     (resource == null || 
+                      resource.data.userId == request.auth.uid || 
+                      resource.data.userId == "anonymous" ||
+                      !('userId' in resource.data));
       
-      // anonymous または userId が null のデータも読み書き可能（後方互換性）
-      allow read, write: if request.auth != null && 
-        (resource == null || resource.data.userId == 'anonymous' || !('userId' in resource.data));
+      // 作成: 認証済みユーザーは自分のuserIdで作成可能、またはanonymousで作成可能
+      allow create: if request.auth != null && 
+                       (request.resource.data.userId == request.auth.uid || 
+                        request.resource.data.userId == "anonymous");
+      
+      // 更新: 認証済みユーザーは自分のデータを更新可能
+      allow update: if request.auth != null && 
+                       resource.data.userId == request.auth.uid;
+      
+      // 削除: 認証済みユーザーは自分のデータを削除可能
+      allow delete: if request.auth != null && 
+                       resource.data.userId == request.auth.uid;
     }
   }
 }
