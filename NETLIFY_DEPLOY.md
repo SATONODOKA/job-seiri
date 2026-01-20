@@ -23,6 +23,16 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 ```
 
+### LLM設定（オプション）
+
+求人データの整形・補完にLLMを使用する場合は、以下も設定してください：
+
+```
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+**注意**: `GEMINI_API_KEY`が設定されていない場合、LLM機能は無効化され、ルールベース抽出のみが実行されます。
+
 **重要**: 環境変数が設定されていない場合でも、ビルドは成功しますが、実行時にエラーが発生します。必ずすべての環境変数を設定してください。
 
 ## デプロイ設定

@@ -113,8 +113,8 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
   btn.disabled = true;
   btn.textContent = "保存中...";
-  status.textContent = "";
-  status.className = "";
+  status.textContent = "ページ情報を取得中...";
+  status.className = "processing";
 
   try {
     // 現在のタブを取得
@@ -126,6 +126,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     }
 
     // ページ内でスクリプトを実行してページ情報を取得
+    status.textContent = "ページ情報を取得中...";
     const results = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: getPageInfo
@@ -146,10 +147,13 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       throw new Error(`無効なURL形式です: ${pageInfo.url}`);
     }
 
-    // Firestoreに保存
+    // 求人情報を抽出・保存（LLM処理も含む）
+    status.textContent = "求人情報を抽出中...\n（LLMで整形中）";
+    status.className = "processing";
     await saveToFirestore(pageInfo);
 
-    status.textContent = "保存しました!";
+    status.textContent = "✅ 保存しました!\n（LLMで整形済み）";
+    status.className = "";
   } catch (error) {
     console.error(error);
     // エラーメッセージを表示（改行を含む場合は複数行で表示）

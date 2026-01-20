@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { extractJobData } from "@/lib/parsers/jobExtractor";
+import { refineWithGemini } from "@/lib/llm/providers/gemini";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -50,11 +51,23 @@ export async function POST(request: Request) {
             );
         }
 
-        // 求人情報を抽出（パフォーマンス測定）
+        // 求人情報を抽出（ルールベース）
         const extractionStart = Date.now();
-        const extractedData = extractJobData(validatedUrl, title, content || "");
+        const ruleBasedData = extractJobData(validatedUrl, title, content || "");
         const extractionTime = Date.now() - extractionStart;
-        console.log(`[Performance] 抽出処理時間: ${extractionTime}ms`);
+        console.log(`[Performance] ルールベース抽出処理時間: ${extractionTime}ms`);
+
+        // LLMで整形・補完（強制実行）
+        const llmStart = Date.now();
+        const extractedData = await refineWithGemini(
+            ruleBasedData,
+            validatedUrl,
+            title,
+            content || ""
+        );
+        const llmTime = Date.now() - llmStart;
+        console.log(`[Performance] LLM処理時間: ${llmTime}ms`);
+        console.log(`[Performance] 合計処理時間: ${extractionTime + llmTime}ms`);
 
         // Firestoreにデータを追加
         const docRef = await addDoc(collection(db, "jobs"), {
