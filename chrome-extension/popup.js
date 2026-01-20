@@ -4,131 +4,192 @@
 
 // HTMLタグを除去してテキストのみを取得する関数
 function getCleanText(element) {
-  // まず、スクリプトとスタイルタグを除去したクローンを作成
-  const clone = element.cloneNode(true);
-  const scripts = clone.querySelectorAll('script, style, noscript');
-  scripts.forEach(el => el.remove());
-  
-  // innerTextを試す（レンダリングされたテキストを取得）
-  let text = clone.innerText || '';
-  
-  // innerTextが空またはHTMLタグが含まれている場合は、textContentを使用
-  if (!text || text.includes('<') || text.length < 10) {
-    text = clone.textContent || '';
+  try {
+    // まず、スクリプトとスタイルタグを除去したクローンを作成
+    const clone = element.cloneNode(true);
+    const scripts = clone.querySelectorAll('script, style, noscript');
+    scripts.forEach(el => el.remove());
+    
+    // innerTextを試す（レンダリングされたテキストを取得）
+    let text = clone.innerText || '';
+    
+    // innerTextが空またはHTMLタグが含まれている場合は、textContentを使用
+    if (!text || text.includes('<') || text.length < 10) {
+      text = clone.textContent || '';
+    }
+    
+    // まだHTMLタグが含まれている場合は、正規表現で除去
+    if (text.includes('<')) {
+      text = text.replace(/<[^>]*>/g, '');
+    }
+    
+    // 連続する空白や改行を整理
+    text = text.replace(/\s+/g, ' ').trim();
+    
+    return text;
+  } catch (e) {
+    // エラーが発生した場合は、シンプルにtextContentを使用
+    try {
+      return (element.textContent || element.innerText || '').replace(/\s+/g, ' ').trim();
+    } catch (e2) {
+      return '';
+    }
   }
-  
-  // まだHTMLタグが含まれている場合は、正規表現で除去
-  if (text.includes('<')) {
-    text = text.replace(/<[^>]*>/g, '');
-  }
-  
-  // 連続する空白や改行を整理
-  text = text.replace(/\s+/g, ' ').trim();
-  
-  return text;
 }
 
 // HTML構造から不要な要素を除去する関数
 function getCleanHTML(element) {
-  const clone = element.cloneNode(true);
-  
-  // スクリプト、スタイル、noscriptを除去
-  const toRemove = clone.querySelectorAll('script, style, noscript, iframe, embed, object');
-  toRemove.forEach(el => el.remove());
-  
-  // コメントを除去
-  const walker = document.createTreeWalker(
-    clone,
-    NodeFilter.SHOW_COMMENT,
-    null,
-    false
-  );
-  const comments = [];
-  let node;
-  while (node = walker.nextNode()) {
-    comments.push(node);
+  try {
+    const clone = element.cloneNode(true);
+    
+    // スクリプト、スタイル、noscriptを除去
+    const toRemove = clone.querySelectorAll('script, style, noscript, iframe, embed, object');
+    toRemove.forEach(el => el.remove());
+    
+    // コメントを除去
+    try {
+      const walker = document.createTreeWalker(
+        clone,
+        NodeFilter.SHOW_COMMENT,
+        null,
+        false
+      );
+      const comments = [];
+      let node;
+      while (node = walker.nextNode()) {
+        comments.push(node);
+      }
+      comments.forEach(comment => comment.remove());
+    } catch (e) {
+      // TreeWalkerが失敗した場合はスキップ
+      console.warn('TreeWalker failed:', e);
+    }
+    
+    return clone.innerHTML;
+  } catch (e) {
+    // エラーが発生した場合は、シンプルにinnerHTMLを使用（スクリプトタグのみ除去）
+    try {
+      const html = element.innerHTML || '';
+      return html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+                 .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    } catch (e2) {
+      return '';
+    }
   }
-  comments.forEach(comment => comment.remove());
-  
-  return clone.innerHTML;
 }
 
 // ページ情報を取得する関数（タブ内で実行される）
 function getPageInfo() {
-  // 複数の候補セレクターを定義
-  const candidateSelectors = [
-    'main',
-    'article',
-    '[role="main"]',
-    '[class*="job"]',
-    '[class*="content"]',
-    '[class*="description"]',
-    '[id*="content"]',
-    '[id*="main"]',
-    '[id*="job"]',
-    'section',
-    '.container',
-    '#container',
-    'table', // テーブル構造のサイトにも対応
-    '[class*="detail"]',
-    '[class*="posting"]'
-  ];
-  
-  // 各セレクターで要素を取得し、テキスト量を評価
-  let bestElement = null;
-  let maxTextLength = 0;
-  
-  for (const selector of candidateSelectors) {
-    try {
-      const elements = document.querySelectorAll(selector);
-      elements.forEach(el => {
-        // クリーンなテキストを取得して評価
-        const cleanText = getCleanText(el);
-        const textLength = cleanText.length;
-        
-        // ナビゲーションやフッターを除外（テキストが短すぎる、またはリンクが多い）
-        const linkCount = el.querySelectorAll('a').length;
-        const linkRatio = linkCount / Math.max(textLength, 1);
-        
-        // HTMLタグが多く含まれている場合は除外（タグの比率が高い）
-        const htmlLength = el.innerHTML.length;
-        const tagRatio = (htmlLength - textLength) / Math.max(htmlLength, 1);
-        
-        // 最小500文字、リンク比率30%未満、タグ比率50%未満の要素を優先
-        if (textLength > maxTextLength && 
-            textLength > 500 && 
-            linkRatio < 0.3 && 
-            tagRatio < 0.5) {
-          maxTextLength = textLength;
-          bestElement = el;
-        }
-      });
-    } catch (e) {
-      // セレクターが無効な場合はスキップ
-      console.warn('Invalid selector:', selector, e);
+  try {
+    // 複数の候補セレクターを定義
+    const candidateSelectors = [
+      'main',
+      'article',
+      '[role="main"]',
+      '[class*="job"]',
+      '[class*="content"]',
+      '[class*="description"]',
+      '[id*="content"]',
+      '[id*="main"]',
+      '[id*="job"]',
+      'section',
+      '.container',
+      '#container',
+      'table', // テーブル構造のサイトにも対応
+      '[class*="detail"]',
+      '[class*="posting"]'
+    ];
+    
+    // 各セレクターで要素を取得し、テキスト量を評価
+    let bestElement = null;
+    let maxTextLength = 0;
+    
+    for (const selector of candidateSelectors) {
+      try {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          try {
+            // クリーンなテキストを取得して評価
+            const cleanText = getCleanText(el);
+            const textLength = cleanText.length;
+            
+            // ナビゲーションやフッターを除外（テキストが短すぎる、またはリンクが多い）
+            const linkCount = el.querySelectorAll('a').length;
+            const linkRatio = linkCount / Math.max(textLength, 1);
+            
+            // HTMLタグが多く含まれている場合は除外（タグの比率が高い）
+            const htmlLength = (el.innerHTML || '').length;
+            const tagRatio = htmlLength > 0 ? (htmlLength - textLength) / htmlLength : 0;
+            
+            // 最小500文字、リンク比率30%未満、タグ比率50%未満の要素を優先
+            if (textLength > maxTextLength && 
+                textLength > 500 && 
+                linkRatio < 0.3 && 
+                tagRatio < 0.5) {
+              maxTextLength = textLength;
+              bestElement = el;
+            }
+          } catch (e) {
+            // 個別の要素処理でエラーが発生した場合はスキップ
+            console.warn('Error processing element:', e);
+          }
+        });
+      } catch (e) {
+        // セレクターが無効な場合はスキップ
+        console.warn('Invalid selector:', selector, e);
+      }
     }
+    
+    // 最適な要素が見つからない場合はbodyを使用
+    const contentElement = bestElement || document.body;
+    
+    // クリーンなテキストとHTML構造を取得
+    let textContent = '';
+    let htmlContent = '';
+    
+    try {
+      textContent = getCleanText(contentElement);
+    } catch (e) {
+      console.warn('getCleanText failed, using fallback:', e);
+      textContent = (contentElement.textContent || contentElement.innerText || '').substring(0, 20000);
+    }
+    
+    try {
+      htmlContent = getCleanHTML(contentElement);
+    } catch (e) {
+      console.warn('getCleanHTML failed, using fallback:', e);
+      htmlContent = (contentElement.innerHTML || '').substring(0, 50000);
+    }
+    
+    // メタデータも取得
+    let metaTags = [];
+    try {
+      metaTags = Array.from(document.querySelectorAll('meta')).map(meta => ({
+        name: meta.getAttribute('name') || meta.getAttribute('property') || meta.getAttribute('itemprop'),
+        content: meta.getAttribute('content')
+      })).filter(m => m.name && m.content);
+    } catch (e) {
+      console.warn('Failed to get meta tags:', e);
+    }
+    
+    return {
+      url: window.location.href,
+      title: document.title,
+      content: textContent.substring(0, 20000), // 文字数制限を緩和
+      htmlStructure: htmlContent.substring(0, 50000), // HTML構造も含める（クリーンアップ済み）
+      metaTags: metaTags
+    };
+  } catch (error) {
+    // 全体でエラーが発生した場合でも、最低限の情報を返す
+    console.error('getPageInfo error:', error);
+    return {
+      url: window.location.href,
+      title: document.title,
+      content: (document.body?.textContent || document.body?.innerText || '').substring(0, 20000),
+      htmlStructure: (document.body?.innerHTML || '').substring(0, 50000),
+      metaTags: []
+    };
   }
-  
-  // 最適な要素が見つからない場合はbodyを使用
-  const contentElement = bestElement || document.body;
-  
-  // クリーンなテキストとHTML構造を取得
-  const textContent = getCleanText(contentElement);
-  const htmlContent = getCleanHTML(contentElement);
-  
-  // メタデータも取得
-  const metaTags = Array.from(document.querySelectorAll('meta')).map(meta => ({
-    name: meta.getAttribute('name') || meta.getAttribute('property') || meta.getAttribute('itemprop'),
-    content: meta.getAttribute('content')
-  })).filter(m => m.name && m.content);
-  
-  return {
-    url: window.location.href,
-    title: document.title,
-    content: textContent.substring(0, 20000), // 文字数制限を緩和
-    htmlStructure: htmlContent.substring(0, 50000), // HTML構造も含める（クリーンアップ済み）
-    metaTags: metaTags
-  };
 }
 
 // Firestore REST APIで保存
@@ -237,16 +298,33 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
     // ページ内でスクリプトを実行してページ情報を取得
     status.textContent = "ページ情報を取得中...";
-    const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: getPageInfo
-    });
+    let results;
+    try {
+      results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: getPageInfo
+      });
+    } catch (scriptError) {
+      console.error('Script execution error:', scriptError);
+      throw new Error(`スクリプト実行エラー: ${scriptError.message || '不明なエラー'}`);
+    }
 
-    if (!results || results.length === 0 || !results[0].result) {
-      throw new Error("ページ情報を取得できませんでした");
+    if (!results || results.length === 0) {
+      throw new Error("スクリプト実行結果が空です");
+    }
+
+    if (!results[0] || !results[0].result) {
+      const errorDetails = results[0]?.error || '不明なエラー';
+      console.error('Script result error:', errorDetails);
+      throw new Error(`ページ情報を取得できませんでした: ${errorDetails}`);
     }
 
     const pageInfo = results[0].result;
+    
+    // 最低限の情報が取得できているか確認
+    if (!pageInfo.url || !pageInfo.title) {
+      throw new Error("URLまたはタイトルが取得できませんでした");
+    }
     
     // URLのバリデーション（無効なURLの場合はエラー）
     try {
