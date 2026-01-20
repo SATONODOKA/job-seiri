@@ -201,12 +201,30 @@ export default function JobCard({ job }: JobCardProps) {
               </h3>
               <div className="flex items-center gap-2 mt-1">
                 {(() => {
-                  // 年収帯の表示
-                  const salaryBand = displayData.salaryBand;
+                  // 年収帯の表示（範囲がある場合は範囲を優先表示）
                   const salaryMin = displayData.salaryMin;
                   const salaryMax = displayData.salaryMax;
+                  const salaryBand = displayData.salaryBand;
                   
-                  if (salaryBand) {
+                  // 範囲がある場合は範囲を表示（salaryMinとsalaryMaxの両方がある場合）
+                  if (salaryMin && salaryMax) {
+                    const minInMillion = Math.floor(salaryMin / 1000000);
+                    const maxInMillion = Math.floor(salaryMax / 1000000);
+                    return (
+                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap">
+                        {minInMillion}〜{maxInMillion}万円
+                      </span>
+                    );
+                  } else if (salaryMin) {
+                    // salaryMinのみの場合
+                    const minInMillion = Math.floor(salaryMin / 1000000);
+                    return (
+                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap">
+                        {minInMillion}万円以上
+                      </span>
+                    );
+                  } else if (salaryBand) {
+                    // salaryBandのみの場合（フィルター用）
                     return (
                       <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap">
                         {salaryBand === "〜500" ? "〜500万円" :
@@ -214,14 +232,6 @@ export default function JobCard({ job }: JobCardProps) {
                          salaryBand === "700-900" ? "700-900万円" :
                          salaryBand === "900+" ? "900万円以上" :
                          `${salaryBand}万円`}
-                      </span>
-                    );
-                  } else if (salaryMin) {
-                    return (
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap">
-                        {salaryMin >= 10000 
-                          ? `${Math.floor(salaryMin / 10000)}万円${salaryMax ? `〜${Math.floor(salaryMax / 10000)}万円` : ''}`
-                          : `${salaryMin}円${salaryMax ? `〜${salaryMax}円` : ''}`}
                       </span>
                     );
                   }
