@@ -290,18 +290,17 @@ async function getAuthToken() {
 // Firestore REST APIで保存
 async function saveToFirestore(data) {
   // Next.js APIルートを呼び出す
-  // 開発環境と本番環境の判定
   // Chrome拡張機能のpopupではwindow.location.hostnameが使えないため、
   // 設定ファイル（config.js）でAPI_URLが指定されている場合はそれを使用
-  // デフォルトは開発環境（localhost:3001 - package.jsonのdevスクリプトに合わせる）
-  let API_URL = "http://localhost:3001/api/jobs/capture";
+  // デフォルトは本番環境（Netlify）
+  let API_URL = "https://kyujin-bookmark.netlify.app/api/jobs/capture";
   
   // 設定ファイルからAPI_URLを読み込む（存在する場合）
   if (typeof window !== 'undefined' && window.API_URL) {
     API_URL = window.API_URL;
     console.log("config.jsからAPI_URLを読み込み:", API_URL);
   } else {
-    console.log("デフォルトのAPI_URLを使用:", API_URL);
+    console.log("デフォルトのAPI_URL（本番環境）を使用:", API_URL);
   }
 
   // 認証トークンを取得
@@ -335,7 +334,7 @@ async function saveToFirestore(data) {
     let errorMessage = "ネットワークエラーが発生しました。";
     
     if (fetchError.message.includes("Failed to fetch") || fetchError.message.includes("NetworkError")) {
-      errorMessage = "開発サーバーに接続できません。\n\n確認事項:\n1. 開発サーバーが起動しているか (npm run dev)\n2. ポート番号が正しいか (localhost:3001)\n3. ファイアウォール設定を確認";
+      errorMessage = "サーバーに接続できません。\n\n確認事項:\n1. インターネット接続を確認してください\n2. サーバーが正常に動作しているか確認してください\n3. しばらく待ってから再試行してください";
     } else if (fetchError.message.includes("CORS")) {
       errorMessage = "CORSエラーが発生しました。サーバー側のCORS設定を確認してください。";
     } else {
@@ -360,7 +359,7 @@ async function saveToFirestore(data) {
         console.error("API error (non-JSON):", errorText.substring(0, 200));
         // HTMLエラーページの場合は、ステータスコードから判断
         if (response.status === 404) {
-          errorMessage = "APIエンドポイントが見つかりません。開発サーバーが起動しているか確認してください。";
+          errorMessage = "APIエンドポイントが見つかりません。サーバーの設定を確認してください。";
         } else if (response.status === 500) {
           errorMessage = "サーバーエラーが発生しました。";
         } else {
