@@ -40,7 +40,7 @@
 ユーザーは、Webアプリの求人カードから「アーカイブ」または「完全削除」ボタンでいつでもデータを削除できます。
 
 ### 削除方法
-1. Webアプリ（https://job-seiri.netlify.app）にアクセス
+1. Webアプリ（https://kyujin-bookmark.netlify.app）にアクセス
 2. 削除したい求人カードを開く
 3. 「アーカイブ」または「完全削除」ボタンをクリック
 
@@ -55,7 +55,7 @@
 プライバシーに関するお問い合わせは、以下までご連絡ください：
 
 - Email: [問い合わせ先メールアドレスを設定してください]
-- Web: https://job-seiri.netlify.app/support
+- Web: https://kyujin-bookmark.netlify.app/support
 
 ## 8. プライバシーポリシーの変更
 

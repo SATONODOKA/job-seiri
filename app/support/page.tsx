@@ -64,7 +64,7 @@ export default function SupportPage() {
                 問題が解決しない場合、以下の方法でお問い合わせください：
               </p>
               <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
-                <li>サービスURL: <a href="https://job-seiri.netlify.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">https://job-seiri.netlify.app</a></li>
+                <li>サービスURL: <a href="https://kyujin-bookmark.netlify.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">https://kyujin-bookmark.netlify.app</a></li>
                 <li>プライバシーポリシー: <a href="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline">プライバシーポリシー</a></li>
               </ul>
             </section>

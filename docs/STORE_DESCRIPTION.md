@@ -21,7 +21,7 @@
 
 1. 求人詳細ページで拡張機能アイコンをクリック
 2. 「この求人を保存」ボタンをクリック
-3. Webダッシュボード（https://job-seiri.netlify.app）で保存した求人を確認
+3. Webダッシュボード（https://kyujin-bookmark.netlify.app）で保存した求人を確認
 
 ### 【データの取り扱い】
 
@@ -53,9 +53,9 @@
 ### 【プライバシーポリシー】
 
 詳細は以下のURLをご確認ください：
-https://job-seiri.netlify.app/privacy-policy
+https://kyujin-bookmark.netlify.app/privacy-policy
 
 ### 【サポート】
 
 問題やご質問がございましたら、サポートページまでお問い合わせください：
-https://job-seiri.netlify.app/support
+https://kyujin-bookmark.netlify.app/support

@@ -142,9 +142,9 @@ zip -r ../job-seiri-v1.0.0.zip . \
 
 ### サポート情報
 
-- **Support URL**: https://job-seiri.netlify.app/support
-- **Privacy Policy URL**: https://job-seiri.netlify.app/privacy-policy
-- **Homepage URL**: https://job-seiri.netlify.app
+- **Support URL**: https://kyujin-bookmark.netlify.app/support
+- **Privacy Policy URL**: https://kyujin-bookmark.netlify.app/privacy-policy
+- **Homepage URL**: https://kyujin-bookmark.netlify.app
 
 ### 権限説明文
 

@@ -218,12 +218,12 @@ export default function PrivacyPolicyPage() {
               </p>
               <p className="text-slate-600 mb-3">
                 サービスURL: <a 
-                  href="https://job-seiri.netlify.app" 
+                  href="https://kyujin-bookmark.netlify.app" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 underline"
                 >
-                  https://job-seiri.netlify.app
+                  https://kyujin-bookmark.netlify.app
                 </a>
               </p>
             </section>

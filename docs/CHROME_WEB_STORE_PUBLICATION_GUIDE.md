@@ -41,7 +41,7 @@ Save job postings with one click and manage job information automatically extrac
 【使用方法】
 1. 求人詳細ページで拡張機能アイコンをクリック
 2. 「この求人を保存」ボタンをクリック
-3. Webダッシュボード（https://job-seiri.netlify.app）で保存した求人を確認
+3. Webダッシュボード（https://kyujin-bookmark.netlify.app）で保存した求人を確認
 
 【データの取り扱い】
 この拡張機能は、ユーザーが「この求人を保存」ボタンをクリックした時のみ、以下のデータを送信します：
@@ -59,10 +59,10 @@ Save job postings with one click and manage job information automatically extrac
 - storage: 認証トークンなどの設定情報を保存するために必要です
 
 【プライバシーポリシー】
-https://job-seiri.netlify.app/privacy-policy
+https://kyujin-bookmark.netlify.app/privacy-policy
 
 【サポート】
-https://job-seiri.netlify.app/support
+https://kyujin-bookmark.netlify.app/support
 ```
 
 **英語版:**
@@ -81,7 +81,7 @@ A Chrome extension for efficiently saving and managing job postings.
 【How to Use】
 1. Click the extension icon on a job detail page
 2. Click the "Save this job" button
-3. View saved job postings on the web dashboard (https://job-seiri.netlify.app)
+3. View saved job postings on the web dashboard (https://kyujin-bookmark.netlify.app)
 
 【Data Handling】
 This extension only sends the following data when you click the "Save this job" button:
@@ -99,10 +99,10 @@ Users can delete their data at any time from the web dashboard. For details, ple
 - storage: Required to save settings such as authentication tokens
 
 【Privacy Policy】
-https://job-seiri.netlify.app/privacy-policy
+https://kyujin-bookmark.netlify.app/privacy-policy
 
 【Support】
-https://job-seiri.netlify.app/support
+https://kyujin-bookmark.netlify.app/support
 ```
 
 **文字数**: 日本語 約650文字、英語 約1,200文字（制限: 16,000文字以内）
@@ -188,19 +188,19 @@ Save job postings with one click and manage job information automatically extrac
 
 #### Support URL（サポートURL）
 ```
-https://job-seiri.netlify.app/support
+https://kyujin-bookmark.netlify.app/support
 ```
 
 #### Privacy Policy URL（プライバシーポリシーURL）
 ```
-https://job-seiri.netlify.app/privacy-policy
+https://kyujin-bookmark.netlify.app/privacy-policy
 ```
 
 **必須**: データを収集する拡張機能の場合、プライバシーポリシーURLは必須です。
 
 #### Homepage URL（ホームページURL）
 ```
-https://job-seiri.netlify.app
+https://kyujin-bookmark.netlify.app
 ```
 
 ### 4. 権限説明文（Permissions Justification）
