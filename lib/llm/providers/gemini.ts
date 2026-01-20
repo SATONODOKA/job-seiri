@@ -24,6 +24,11 @@ export async function refineWithGemini(
   title: string,
   content: string
 ): Promise<ExtractedJobData> {
+  console.log('[LLM] refineWithGemini 開始');
+  console.log('[LLM] API_KEY存在確認:', !!process.env.GEMINI_API_KEY);
+  console.log('[LLM] genAI存在確認:', !!genAI);
+  console.log('[LLM] ルールベース結果:', JSON.stringify(ruleBasedResult, null, 2));
+
   if (!genAI) {
     console.warn('⚠️ Gemini APIが初期化されていません。ルールベースの結果をそのまま返します。');
     return ruleBasedResult;
@@ -33,6 +38,7 @@ export async function refineWithGemini(
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
     const prompt = buildPrompt(ruleBasedResult, url, title, content);
+    console.log('[LLM] プロンプト長:', prompt.length, '文字');
 
     const startTime = Date.now();
     const result = await model.generateContent(prompt);
@@ -41,13 +47,20 @@ export async function refineWithGemini(
     const elapsedTime = Date.now() - startTime;
 
     console.log(`[LLM] Gemini処理時間: ${elapsedTime}ms`);
+    console.log('[LLM] レスポンステキスト（最初の500文字）:', text.substring(0, 500));
 
     // JSONをパース
     const refined = parseLLMResponse(text, ruleBasedResult);
+    console.log('[LLM] LLM整形後結果:', JSON.stringify(refined, null, 2));
+    
+    // 変更があったかチェック
+    const hasChanges = JSON.stringify(ruleBasedResult) !== JSON.stringify(refined);
+    console.log('[LLM] ルールベース結果と比較:', hasChanges ? '変更あり' : '変更なし');
 
     return refined;
   } catch (error) {
     console.error('❌ Gemini API エラー:', error);
+    console.error('❌ エラー詳細:', error instanceof Error ? error.stack : String(error));
     // エラー時はルールベースの結果を返す
     return ruleBasedResult;
   }
@@ -117,23 +130,31 @@ function parseLLMResponse(text: string, fallback: ExtractedJobData): ExtractedJo
 
     const parsed = JSON.parse(jsonText);
 
-    // 型チェックとマージ（LLMの結果で上書き、nullの場合はfallbackを維持）
-    return {
-      companyName: parsed.companyName ?? fallback.companyName,
-      jobTitle: parsed.jobTitle ?? fallback.jobTitle,
-      salaryMin: parsed.salaryMin ?? fallback.salaryMin,
-      salaryMax: parsed.salaryMax ?? fallback.salaryMax,
-      salaryBand: parsed.salaryBand ?? fallback.salaryBand,
-      locationText: parsed.locationText ?? fallback.locationText,
-      remoteType: parsed.remoteType ?? fallback.remoteType,
-      employmentType: (parsed.employmentType as EmploymentType) ?? fallback.employmentType,
-      requiredYears: parsed.requiredYears ?? fallback.requiredYears,
-      seniorityLevel: parsed.seniorityLevel ?? fallback.seniorityLevel,
-      jobDescription: parsed.jobDescription ?? fallback.jobDescription,
-      requiredPerson: parsed.requiredPerson ?? fallback.requiredPerson,
-      jobType: parsed.jobType ?? fallback.jobType,
-      industry: parsed.industry ?? fallback.industry,
+    // 型チェックとマージ（LLMの結果で上書き、undefinedの場合はfallbackを維持）
+    // nullは有効な値として扱う（LLMが明示的にnullを返した場合はnullを使用）
+    const refined: ExtractedJobData = {
+      companyName: parsed.companyName !== undefined ? parsed.companyName : fallback.companyName,
+      jobTitle: parsed.jobTitle !== undefined ? parsed.jobTitle : fallback.jobTitle,
+      salaryMin: parsed.salaryMin !== undefined ? parsed.salaryMin : fallback.salaryMin,
+      salaryMax: parsed.salaryMax !== undefined ? parsed.salaryMax : fallback.salaryMax,
+      salaryBand: parsed.salaryBand !== undefined ? parsed.salaryBand : fallback.salaryBand,
+      locationText: parsed.locationText !== undefined ? parsed.locationText : fallback.locationText,
+      remoteType: parsed.remoteType !== undefined ? parsed.remoteType : fallback.remoteType,
+      employmentType: parsed.employmentType !== undefined ? (parsed.employmentType as EmploymentType) : fallback.employmentType,
+      requiredYears: parsed.requiredYears !== undefined ? parsed.requiredYears : fallback.requiredYears,
+      seniorityLevel: parsed.seniorityLevel !== undefined ? parsed.seniorityLevel : fallback.seniorityLevel,
+      jobDescription: parsed.jobDescription !== undefined ? parsed.jobDescription : fallback.jobDescription,
+      requiredPerson: parsed.requiredPerson !== undefined ? parsed.requiredPerson : fallback.requiredPerson,
+      jobType: parsed.jobType !== undefined ? parsed.jobType : fallback.jobType,
+      industry: parsed.industry !== undefined ? parsed.industry : fallback.industry,
     };
+    
+    console.log('[LLM] パース後の比較:');
+    console.log('[LLM] companyName:', { LLM: parsed.companyName, fallback: fallback.companyName, result: refined.companyName });
+    console.log('[LLM] jobTitle:', { LLM: parsed.jobTitle, fallback: fallback.jobTitle, result: refined.jobTitle });
+    console.log('[LLM] salaryMin:', { LLM: parsed.salaryMin, fallback: fallback.salaryMin, result: refined.salaryMin });
+    
+    return refined;
   } catch (error) {
     console.error('❌ LLMレスポンスのパースエラー:', error);
     console.error('レスポンステキスト:', text);

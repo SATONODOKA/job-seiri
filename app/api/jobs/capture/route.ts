@@ -56,9 +56,11 @@ export async function POST(request: Request) {
         const ruleBasedData = extractJobData(validatedUrl, title, content || "");
         const extractionTime = Date.now() - extractionStart;
         console.log(`[Performance] ルールベース抽出処理時間: ${extractionTime}ms`);
+        console.log('[API] ルールベース抽出結果:', JSON.stringify(ruleBasedData, null, 2));
 
         // LLMで整形・補完（強制実行）
         const llmStart = Date.now();
+        console.log('[API] LLM処理開始...');
         const extractedData = await refineWithGemini(
             ruleBasedData,
             validatedUrl,
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
         const llmTime = Date.now() - llmStart;
         console.log(`[Performance] LLM処理時間: ${llmTime}ms`);
         console.log(`[Performance] 合計処理時間: ${extractionTime + llmTime}ms`);
+        console.log('[API] 最終抽出結果（Firestore保存前）:', JSON.stringify(extractedData, null, 2));
 
         // Firestoreにデータを追加
         const docRef = await addDoc(collection(db, "jobs"), {
