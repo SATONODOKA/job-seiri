@@ -278,7 +278,7 @@ EXTENSION_ID=your_chrome_extension_id
 
 2. **Netlifyで公開**
    - プライバシーポリシーをWebアプリに追加
-   - URL: `https://job-seiri.netlify.app/privacy-policy`
+   - URL: `https://kyujin-bookmark.netlify.app/privacy-policy`
    - または、別のURLに公開
 
 3. **アクセス確認**
@@ -301,7 +301,7 @@ EXTENSION_ID=your_chrome_extension_id
    - トラブルシューティング
 
 2. **Netlifyで公開**
-   - URL: `https://job-seiri.netlify.app/support`
+   - URL: `https://kyujin-bookmark.netlify.app/support`
 
 3. **アクセス確認**
    - [ ] URLがアクセス可能か確認

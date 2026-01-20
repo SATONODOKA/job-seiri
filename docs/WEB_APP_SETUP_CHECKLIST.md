@@ -88,7 +88,7 @@ service cloud.firestore {
 **作業**:
 1. `app/support/page.tsx`を作成
 2. よくある質問（FAQ）、問い合わせフォーム等を追加
-3. URL: `https://job-seiri.netlify.app/support`
+3. URL: `https://kyujin-bookmark.netlify.app/support`
 
 ---
 

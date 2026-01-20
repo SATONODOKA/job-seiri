@@ -515,7 +515,7 @@ const response = await fetch(API_URL, {
 ```html
 <div id="consent" style="display: none; padding: 8px; background: #f0f9ff; border-radius: 4px; margin-top: 8px; font-size: 11px; color: #1e40af;">
   <p>このボタンをクリックすると、ページのURL、タイトル、本文が送信され、AIで求人情報が抽出されます。</p>
-  <p style="margin-top: 4px;"><a href="https://job-seiri.netlify.app/privacy-policy" target="_blank">プライバシーポリシー</a></p>
+  <p style="margin-top: 4px;"><a href="https://kyujin-bookmark.netlify.app/privacy-policy" target="_blank">プライバシーポリシー</a></p>
 </div>
 ```
 

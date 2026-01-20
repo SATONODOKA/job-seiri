@@ -59,7 +59,7 @@ npm run build
 `chrome-extension/config.js`で、本番環境のAPI URLを設定してください：
 
 ```javascript
-const API_URL = "https://job-seiri.netlify.app/api/jobs/capture";
+const API_URL = "https://kyujin-bookmark.netlify.app/api/jobs/capture";
 ```
 
 または、Netlifyの実際のURLに合わせて設定してください。

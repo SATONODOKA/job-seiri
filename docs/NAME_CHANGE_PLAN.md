@@ -61,7 +61,7 @@
 
 以下の箇所は変更しません：
 
-- **URL**: `job-seiri.netlify.app`（そのまま）
+- **URL**: `kyujin-bookmark.netlify.app`（新しいURL）
 - **Firestoreコレクション名**: `jobs`（そのまま）
 - **APIルート**: `/api/jobs/capture`（そのまま）
 - **環境変数名**: `NEXT_PUBLIC_FIREBASE_PROJECT_ID=job-seiri`（そのまま）

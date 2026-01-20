@@ -2,7 +2,7 @@
 
 ## ✅ 既に完了していること
 
-- Chrome拡張機能の`config.js`設定済み（`API_URL = "https://job-seiri.netlify.app/api/jobs/capture"`）
+- Chrome拡張機能の`config.js`設定済み（`API_URL = "https://kyujin-bookmark.netlify.app/api/jobs/capture"`）
 - `.env.local`に環境変数設定済み（ローカル開発用）
 
 ---
@@ -67,7 +67,7 @@ GEMINI_API_KEY=AIzaSyBAkiikASl6L4gGwmGdoNk7IPw21w3xZF8
 ### 4. 動作確認（約3分）
 
 #### 4-1. Webアプリの確認
-1. `https://job-seiri.netlify.app` にアクセス
+1. `https://kyujin-bookmark.netlify.app` にアクセス
 2. ログインページが表示されることを確認
 3. アカウントを作成またはログイン
 4. CSSが正しく適用されているか確認
