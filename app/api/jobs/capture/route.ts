@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { extractJobData } from "@/lib/parsers/jobExtractor";
-import { refineWithGemini } from "@/lib/llm/providers/gemini";
+import { extractWithGemini } from "@/lib/llm/providers/gemini";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -51,25 +50,16 @@ export async function POST(request: Request) {
             );
         }
 
-        // 求人情報を抽出（ルールベース）
+        // LLMで求人情報を抽出
         const extractionStart = Date.now();
-        const ruleBasedData = extractJobData(validatedUrl, title, content || "");
-        const extractionTime = Date.now() - extractionStart;
-        console.log(`[Performance] ルールベース抽出処理時間: ${extractionTime}ms`);
-        console.log('[API] ルールベース抽出結果:', JSON.stringify(ruleBasedData, null, 2));
-
-        // LLMで整形・補完（強制実行）
-        const llmStart = Date.now();
-        console.log('[API] LLM処理開始...');
-        const extractedData = await refineWithGemini(
-            ruleBasedData,
+        console.log('[API] LLM抽出処理開始...');
+        const extractedData = await extractWithGemini(
             validatedUrl,
             title,
             content || ""
         );
-        const llmTime = Date.now() - llmStart;
-        console.log(`[Performance] LLM処理時間: ${llmTime}ms`);
-        console.log(`[Performance] 合計処理時間: ${extractionTime + llmTime}ms`);
+        const extractionTime = Date.now() - extractionStart;
+        console.log(`[Performance] LLM抽出処理時間: ${extractionTime}ms`);
         console.log('[API] 最終抽出結果（Firestore保存前）:', JSON.stringify(extractedData, null, 2));
 
         // Firestoreにデータを追加

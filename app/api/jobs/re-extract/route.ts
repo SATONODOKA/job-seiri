@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, updateDoc, doc, query, where } from "firebase/firestore";
-import { extractJobData } from "@/lib/parsers/jobExtractor";
+import { extractWithGemini } from "@/lib/llm/providers/gemini";
 
 export async function POST(request: Request) {
     try {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
             }
 
             const jobData = job.data();
-            const extractedData = extractJobData(
+            const extractedData = await extractWithGemini(
                 jobData.url,
                 jobData.title,
                 jobData.content || ""
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
                 ) && jobData.title && jobData.content;
                 
                 if (needsReExtraction) {
-                    const extractedData = extractJobData(
+                    const extractedData = await extractWithGemini(
                         jobData.url || "",
                         jobData.title,
                         jobData.content || ""

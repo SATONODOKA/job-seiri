@@ -31,7 +31,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 GEMINI_API_KEY=your-gemini-api-key
 ```
 
-**注意**: `GEMINI_API_KEY`が設定されていない場合、LLM機能は無効化され、ルールベース抽出のみが実行されます。
+**注意**: `GEMINI_API_KEY`が設定されていない場合、LLM機能はエラーを返します。抽出機能を使用するには、必ずAPIキーを設定してください。
 
 **重要**: 環境変数が設定されていない場合でも、ビルドは成功しますが、実行時にエラーが発生します。必ずすべての環境変数を設定してください。
 

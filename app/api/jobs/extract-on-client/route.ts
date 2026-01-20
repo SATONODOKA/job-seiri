@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { extractJobData } from "@/lib/parsers/jobExtractor";
+import { extractWithGemini } from "@/lib/llm/providers/gemini";
 
 export async function POST(request: Request) {
     try {
@@ -12,8 +12,8 @@ export async function POST(request: Request) {
             );
         }
 
-        // 求人情報を抽出
-        const extractedData = extractJobData(url, title, content || "");
+        // LLMで求人情報を抽出
+        const extractedData = await extractWithGemini(url, title, content || "");
 
         return NextResponse.json({
             success: true,
