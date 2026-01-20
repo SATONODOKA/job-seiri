@@ -48,16 +48,15 @@ export default function JobFilters({ jobs, onFilterChange }: JobFiltersProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
-      <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-2">
         {/* 職種フィルタ */}
         {jobTypes.length > 0 && (
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-700">職種:</label>
+            <label className="text-xs font-medium text-slate-700 whitespace-nowrap">職種:</label>
             <select
               value={filters.jobType || ""}
               onChange={(e) => handleFilterChange("jobType", e.target.value || null)}
-              className="text-sm bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
+              className="text-xs bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
             >
               <option value="">すべて</option>
               {jobTypes.map((type) => (
@@ -72,11 +71,11 @@ export default function JobFilters({ jobs, onFilterChange }: JobFiltersProps) {
         {/* 業種フィルタ */}
         {industries.length > 0 && (
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-700">業種:</label>
+            <label className="text-xs font-medium text-slate-700 whitespace-nowrap">業種:</label>
             <select
               value={filters.industry || ""}
               onChange={(e) => handleFilterChange("industry", e.target.value || null)}
-              className="text-sm bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
+              className="text-xs bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
             >
               <option value="">すべて</option>
               {industries.map((industry) => (
@@ -90,11 +89,11 @@ export default function JobFilters({ jobs, onFilterChange }: JobFiltersProps) {
 
         {/* 年収帯フィルタ（下限） */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">年収下限:</label>
+          <label className="text-xs font-medium text-slate-700 whitespace-nowrap">年収下限:</label>
           <select
             value={filters.salaryMin?.toString() || ""}
             onChange={(e) => handleFilterChange("salaryMin", e.target.value ? parseInt(e.target.value) : null)}
-            className="text-sm bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
+            className="text-xs bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
           >
             <option value="">すべて</option>
             <option value="300">300万円以上</option>
@@ -110,11 +109,11 @@ export default function JobFilters({ jobs, onFilterChange }: JobFiltersProps) {
 
         {/* 年収帯フィルタ（上限） */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">年収上限:</label>
+          <label className="text-xs font-medium text-slate-700 whitespace-nowrap">年収上限:</label>
           <select
             value={filters.salaryMax?.toString() || ""}
             onChange={(e) => handleFilterChange("salaryMax", e.target.value ? parseInt(e.target.value) : null)}
-            className="text-sm bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
+            className="text-xs bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
           >
             <option value="">すべて</option>
             <option value="500">500万円以下</option>
@@ -130,11 +129,11 @@ export default function JobFilters({ jobs, onFilterChange }: JobFiltersProps) {
 
         {/* 年収帯フィルタ（従来の方式も残す） */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700">年収帯:</label>
+          <label className="text-xs font-medium text-slate-700 whitespace-nowrap">年収帯:</label>
           <select
             value={filters.salaryBand || ""}
             onChange={(e) => handleFilterChange("salaryBand", e.target.value || null)}
-            className="text-sm bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
+            className="text-xs bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
           >
             <option value="">すべて</option>
             {salaryBands.map((band) => (
@@ -153,12 +152,11 @@ export default function JobFilters({ jobs, onFilterChange }: JobFiltersProps) {
               setFilters(resetFilters);
               onFilterChange(resetFilters);
             }}
-            className="text-sm text-slate-600 hover:text-slate-800 underline"
+            className="text-xs text-slate-600 hover:text-slate-800 underline whitespace-nowrap"
           >
             リセット
           </button>
         )}
-      </div>
     </div>
   );
 }

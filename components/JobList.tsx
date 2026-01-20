@@ -213,13 +213,14 @@ export default function JobList() {
 
   return (
     <div>
-      {/* タブ切り替え */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+      {/* タブ切り替えとフィルタ・ソートを1つのコンテナにまとめる */}
+      <div className="bg-white rounded-xl border border-slate-200 p-3 mb-4 space-y-3">
+        {/* タブ切り替え */}
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
             <button
               onClick={() => setShowArchived(false)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 !showArchived
                   ? 'bg-blue-500 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -229,7 +230,7 @@ export default function JobList() {
             </button>
             <button
               onClick={() => setShowArchived(true)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 showArchived
                   ? 'bg-blue-500 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -241,55 +242,56 @@ export default function JobList() {
           {selectedJobIds.size > 0 && (
             <button
               onClick={handleBulkDelete}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {showArchived ? '完全削除' : 'アーカイブ'} ({selectedJobIds.size}件)
             </button>
           )}
         </div>
-      </div>
 
-      {/* フィルタ */}
-      <JobFilters jobs={jobs.filter(j => j.isArchived === showArchived)} onFilterChange={setFilters} />
+        {/* フィルタとソートを横並びに */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* フィルタ */}
+          <JobFilters jobs={jobs.filter(j => j.isArchived === showArchived)} onFilterChange={setFilters} />
 
-      {/* ソート */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-slate-700">並び替え:</label>
-          <select
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value as SortField)}
-            className="text-sm bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
-          >
-            <option value="createdAt">保存日</option>
-            <option value="companyName">社名</option>
-            <option value="jobTitle">役職名</option>
-            <option value="salaryMin">年収（下限）</option>
-            <option value="salaryMax">年収（上限）</option>
-          </select>
-          <button
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="text-sm px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-          >
-            {sortOrder === "asc" ? "↑ 昇順" : "↓ 降順"}
-          </button>
+          {/* ソート */}
+          <div className="flex items-center gap-2 ml-auto">
+            <label className="text-xs font-medium text-slate-700 whitespace-nowrap">並び替え:</label>
+            <select
+              value={sortField}
+              onChange={(e) => setSortField(e.target.value as SortField)}
+              className="text-xs bg-white border-2 border-slate-400 text-slate-900 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-slate-500 transition-colors"
+            >
+              <option value="createdAt">保存日</option>
+              <option value="companyName">社名</option>
+              <option value="jobTitle">役職名</option>
+              <option value="salaryMin">年収（下限）</option>
+              <option value="salaryMax">年収（上限）</option>
+            </select>
+            <button
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              className="text-xs px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors whitespace-nowrap"
+            >
+              {sortOrder === "asc" ? "↑ 昇順" : "↓ 降順"}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* 全選択チェックボックス */}
-      {filteredAndSortedJobs.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-3 mb-4 flex items-center gap-3">
-          <input
-            type="checkbox"
-            checked={selectedJobIds.size === filteredAndSortedJobs.length && filteredAndSortedJobs.length > 0}
-            onChange={handleSelectAll}
-            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-          />
-          <label className="text-sm text-slate-700">
-            {selectedJobIds.size > 0 ? `${selectedJobIds.size}件選択中` : 'すべて選択'}
-          </label>
-        </div>
-      )}
+        {/* 全選択チェックボックス */}
+        {filteredAndSortedJobs.length > 0 && (
+          <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+            <input
+              type="checkbox"
+              checked={selectedJobIds.size === filteredAndSortedJobs.length && filteredAndSortedJobs.length > 0}
+              onChange={handleSelectAll}
+              className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+            />
+            <label className="text-xs text-slate-700">
+              {selectedJobIds.size > 0 ? `${selectedJobIds.size}件選択中` : 'すべて選択'}
+            </label>
+          </div>
+        )}
+      </div>
 
       {/* 求人リスト */}
       {filteredAndSortedJobs.length === 0 ? (

@@ -246,8 +246,9 @@ export default function JobCard({ job, isSelected = false, onSelectChange, showA
                   
                   // 範囲がある場合は範囲を表示（salaryMinとsalaryMaxの両方がある場合）
                   if (salaryMin && salaryMax) {
-                    const minInMillion = Math.floor(salaryMin / 1000000);
-                    const maxInMillion = Math.floor(salaryMax / 1000000);
+                    // 円単位から万円単位に変換（10000で割る）
+                    const minInMillion = Math.floor(salaryMin / 10000);
+                    const maxInMillion = Math.floor(salaryMax / 10000);
                     return (
                       <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap">
                         {minInMillion}〜{maxInMillion}万円
@@ -255,7 +256,7 @@ export default function JobCard({ job, isSelected = false, onSelectChange, showA
                     );
                   } else if (salaryMin) {
                     // salaryMinのみの場合
-                    const minInMillion = Math.floor(salaryMin / 1000000);
+                    const minInMillion = Math.floor(salaryMin / 10000);
                     return (
                       <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap">
                         {minInMillion}万円以上
