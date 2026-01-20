@@ -38,6 +38,8 @@ function getCleanText(element) {
 }
 
 // HTML構造から不要な要素を除去する関数
+// 審査で説明が困難なため、htmlStructureの送信を停止したため、この関数は使用しない
+/*
 function getCleanHTML(element) {
   try {
     const clone = element.cloneNode(true);
@@ -77,6 +79,7 @@ function getCleanHTML(element) {
     }
   }
 }
+*/
 
 // ページ情報を取得する関数（タブ内で実行される）
 function getPageInfo() {
@@ -143,9 +146,8 @@ function getPageInfo() {
     // 最適な要素が見つからない場合はbodyを使用
     const contentElement = bestElement || document.body;
     
-    // クリーンなテキストとHTML構造を取得
+    // クリーンなテキストを取得
     let textContent = '';
-    let htmlContent = '';
     
     try {
       textContent = getCleanText(contentElement);
@@ -154,30 +156,16 @@ function getPageInfo() {
       textContent = (contentElement.textContent || contentElement.innerText || '').substring(0, 20000);
     }
     
-    try {
-      htmlContent = getCleanHTML(contentElement);
-    } catch (e) {
-      console.warn('getCleanHTML failed, using fallback:', e);
-      htmlContent = (contentElement.innerHTML || '').substring(0, 50000);
-    }
-    
-    // メタデータも取得
-    let metaTags = [];
-    try {
-      metaTags = Array.from(document.querySelectorAll('meta')).map(meta => ({
-        name: meta.getAttribute('name') || meta.getAttribute('property') || meta.getAttribute('itemprop'),
-        content: meta.getAttribute('content')
-      })).filter(m => m.name && m.content);
-    } catch (e) {
-      console.warn('Failed to get meta tags:', e);
-    }
+    // メタデータを最小化（送信しない、またはog:title/og:descriptionのみ）
+    // MVPでは送信しない方針
+    const metaTags = [];
     
     return {
       url: window.location.href,
       title: document.title,
-      content: textContent.substring(0, 20000), // 文字数制限を緩和
-      htmlStructure: htmlContent.substring(0, 50000), // HTML構造も含める（クリーンアップ済み）
-      metaTags: metaTags
+      content: textContent.substring(0, 20000),
+      // htmlStructure: 削除（審査で説明が困難なため）
+      metaTags: metaTags // 最小化（空配列）
     };
   } catch (error) {
     // 全体でエラーが発生した場合でも、最低限の情報を返す
@@ -186,10 +174,19 @@ function getPageInfo() {
       url: window.location.href,
       title: document.title,
       content: (document.body?.textContent || document.body?.innerText || '').substring(0, 20000),
-      htmlStructure: (document.body?.innerHTML || '').substring(0, 50000),
+      // htmlStructure: 削除
       metaTags: []
     };
   }
+}
+
+// 認証トークンを取得（chrome.storage.localから）
+async function getAuthToken() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['auth_token'], (result) => {
+      resolve(result.auth_token || null);
+    });
+  });
 }
 
 // Firestore REST APIで保存
@@ -209,15 +206,30 @@ async function saveToFirestore(data) {
     console.log("デフォルトのAPI_URLを使用:", API_URL);
   }
 
+  // 認証トークンを取得
+  const token = await getAuthToken();
+  
+  // htmlStructureを送信データから削除
+  const requestData = {
+    url: data.url,
+    title: data.title,
+    content: data.content,
+    // htmlStructure: 削除（審査で説明が困難なため）
+    metaTags: data.metaTags || []
+  };
+
   console.log("API_URL:", API_URL);
-  console.log("Request data:", data);
+  console.log("Request data (htmlStructure removed):", requestData);
   
   let response;
   try {
     response = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(requestData)
     });
   } catch (fetchError) {
     // fetch自体が失敗した場合（ネットワークエラー、CORSエラーなど）
@@ -291,9 +303,17 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     // 現在のタブを取得
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    // chrome://やedge://などの特殊ページでは動作しない
-    if (tab.url.startsWith("chrome://") || tab.url.startsWith("edge://") || tab.url.startsWith("about:")) {
-      throw new Error("このページでは使用できません");
+    // 注入不可ページのチェック
+    if (tab.url.startsWith("chrome://") || 
+        tab.url.startsWith("chrome-extension://") || 
+        tab.url.startsWith("edge://") || 
+        tab.url.startsWith("about:")) {
+      throw new Error("このページでは使用できません。\n\n理由: ブラウザの内部ページのため、情報を取得できません。");
+    }
+    
+    // PDFページのチェック
+    if (tab.url.endsWith('.pdf') || tab.url.includes('.pdf?')) {
+      throw new Error("PDFファイルは直接保存できません。\n\n対処: PDFのURLをWebアプリから手動で保存してください。");
     }
 
     // ページ内でスクリプトを実行してページ情報を取得
@@ -306,6 +326,10 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       });
     } catch (scriptError) {
       console.error('Script execution error:', scriptError);
+      // 注入失敗時の詳細なエラーメッセージ
+      if (scriptError.message && scriptError.message.includes('Cannot access')) {
+        throw new Error("このページでは情報を取得できません。\n\n理由: ページのセキュリティ設定により、拡張機能がアクセスできません。\n\n対処: 通常のWebページ（http:// または https:// で始まるページ）でお試しください。");
+      }
       throw new Error(`スクリプト実行エラー: ${scriptError.message || '不明なエラー'}`);
     }
 

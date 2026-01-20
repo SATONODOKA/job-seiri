@@ -80,10 +80,11 @@ function buildPrompt(
     ? metaTags.map(m => `- ${m.name}: ${m.content}`).join('\n')
     : 'なし';
 
-  // HTML構造情報を追加（存在する場合）
-  const htmlStructureText = htmlStructure
-    ? `\n\n【HTML構造（参考）】\n${htmlStructure.substring(0, 30000)}${htmlStructure.length > 30000 ? '...' : ''}`
-    : '';
+  // HTML構造情報は送信しない（審査で説明が困難なため）
+  // const htmlStructureText = htmlStructure
+  //   ? `\n\n【HTML構造（参考）】\n${htmlStructure.substring(0, 30000)}${htmlStructure.length > 30000 ? '...' : ''}`
+  //   : '';
+  const htmlStructureText = '';
 
   return `あなたは日本の求人情報の構造化データ抽出の専門家です。
 以下の情報から求人情報を抽出し、構造化データとして返してください。
@@ -96,7 +97,7 @@ URL: ${url}
 ${metaTagsText}
 
 【元のテキスト内容】
-${content.substring(0, 20000)}${content.length > 20000 ? '...' : ''}${htmlStructureText}
+${content.substring(0, 20000)}${content.length > 20000 ? '...' : ''}
 
 ---
 
