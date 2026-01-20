@@ -28,12 +28,19 @@ export default function JobList() {
 
   useEffect(() => {
     // Firebaseの初期化確認
+    console.log('[JobList] Firebase初期化チェック:', { db: !!db });
     if (!db) {
-      console.error("Firebaseが初期化されていません。環境変数を確認してください。");
+      console.error("❌ Firebaseが初期化されていません。環境変数を確認してください。");
+      console.error("環境変数チェック:", {
+        hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+        hasProjectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        hasAuthDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      });
       setIsLoading(false);
       return;
     }
 
+    console.log('[JobList] Firestoreクエリを開始...');
     // リアルタイムリスナー（アーカイブ状態でフィルタリング）
     const q = query(
       collection(db, "jobs"),
@@ -42,11 +49,12 @@ export default function JobList() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
+        console.log(`[JobList] データ取得成功: ${snapshot.docs.length}件のドキュメント`);
         const jobsData = snapshot.docs.map((doc) => {
           const data = doc.data();
           // デバッグ: 最初のドキュメントのデータを確認
-          if (process.env.NODE_ENV === 'development' && doc.id === snapshot.docs[0]?.id) {
-            console.log('Firestore Data Sample:', {
+          if (doc.id === snapshot.docs[0]?.id) {
+            console.log('[JobList] Firestore Data Sample:', {
               id: doc.id,
               companyName: data.companyName,
               jobTitle: data.jobTitle,
@@ -55,6 +63,7 @@ export default function JobList() {
               salaryMax: data.salaryMax,
               isArchived: data.isArchived,
               hasContent: !!data.content,
+              userId: data.userId,
               allFields: Object.keys(data)
             });
           }
@@ -70,12 +79,20 @@ export default function JobList() {
         setIsLoading(false);
       },
       (error) => {
-        console.error("データ取得エラー:", error);
+        console.error("❌ [JobList] データ取得エラー:", error);
+        console.error("エラー詳細:", {
+          code: error.code,
+          message: error.message,
+          stack: error.stack
+        });
         setIsLoading(false);
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      console.log('[JobList] リスナーを解除');
+      unsubscribe();
+    };
   }, []);
 
   // フィルタリングとソート

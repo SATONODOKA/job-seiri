@@ -155,6 +155,7 @@ export async function POST(request: Request) {
         safeLog('[API] 最終抽出結果（Firestore保存前）:', extractedData);
 
         // Firestoreにデータを追加
+        console.log('[API] Firestoreにデータを保存開始...', { userId, url: validatedUrl, title });
         const docRef = await addDoc(collection(db, "jobs"), {
             userId, // 認証済みユーザーのID（またはanonymous）
             url: validatedUrl,
@@ -183,6 +184,8 @@ export async function POST(request: Request) {
             requiredYears: extractedData.requiredYears,
             seniorityLevel: extractedData.seniorityLevel,
         });
+
+        console.log('[API] Firestoreにデータを保存完了:', { id: docRef.id, userId, pageType });
 
         const response = NextResponse.json({
             success: true,
