@@ -7,9 +7,12 @@ import { Job } from "@/types/job";
 
 interface JobCardProps {
   job: Job;
+  isSelected?: boolean;
+  onSelectChange?: (isSelected: boolean) => void;
+  showArchived?: boolean;
 }
 
-export default function JobCard({ job }: JobCardProps) {
+export default function JobCard({ job, isSelected = false, onSelectChange, showArchived = false }: JobCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [extractedData, setExtractedData] = useState<{
@@ -124,7 +127,7 @@ export default function JobCard({ job }: JobCardProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("本当に削除しますか？")) return;
+    if (!confirm(showArchived ? "本当に完全に削除しますか？" : "本当にアーカイブしますか？")) return;
 
     if (!db) {
       alert("Firebaseが初期化されていません。環境変数を確認してください。");
@@ -133,12 +136,37 @@ export default function JobCard({ job }: JobCardProps) {
 
     setIsDeleting(true);
     try {
-      await deleteDoc(doc(db, "jobs", job.id));
+      if (showArchived) {
+        // アーカイブから完全削除
+        await deleteDoc(doc(db, "jobs", job.id));
+      } else {
+        // アーカイブに移動
+        await updateDoc(doc(db, "jobs", job.id), { isArchived: true });
+      }
     } catch (error) {
       console.error("削除エラー:", error);
-      alert("削除に失敗しました");
+      alert("操作に失敗しました");
       setIsDeleting(false);
     }
+  };
+
+  const handleRestore = async () => {
+    if (!db) {
+      alert("Firebaseが初期化されていません。環境変数を確認してください。");
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "jobs", job.id), { isArchived: false });
+    } catch (error) {
+      console.error("復元エラー:", error);
+      alert("復元に失敗しました");
+    }
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation(); // カードのクリックイベントを防ぐ
+    onSelectChange?.(e.target.checked);
   };
 
   return (
@@ -146,8 +174,10 @@ export default function JobCard({ job }: JobCardProps) {
       role="button"
       tabIndex={0}
       aria-expanded={isExpanded}
-      className={`bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
+      className={`bg-white rounded-xl border-2 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
         isExpanded ? "ring-2 ring-blue-400" : ""
+      } ${
+        isSelected ? "border-blue-500 bg-blue-50" : "border-slate-200"
       }`}
       onClick={() => setIsExpanded(!isExpanded)}
       onKeyDown={(e) => e.key === "Enter" && setIsExpanded(!isExpanded)}
@@ -155,6 +185,14 @@ export default function JobCard({ job }: JobCardProps) {
       <div className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* チェックボックス */}
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={handleCheckboxChange}
+              onClick={(e) => e.stopPropagation()}
+              className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 flex-shrink-0"
+            />
             <span className="text-slate-400 flex-shrink-0">
               {isExpanded ? "▼" : "▶"}
             </span>
@@ -335,13 +373,40 @@ export default function JobCard({ job }: JobCardProps) {
                 );
               }
             })()}
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="py-2 px-4 text-red-500 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors"
-            >
-              {isDeleting ? "..." : "削除"}
-            </button>
+            {showArchived ? (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRestore();
+                  }}
+                  className="py-2 px-4 text-blue-500 hover:bg-blue-50 text-sm font-medium rounded-lg transition-colors"
+                >
+                  復元
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete();
+                  }}
+                  disabled={isDeleting}
+                  className="py-2 px-4 text-red-500 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors"
+                >
+                  {isDeleting ? "..." : "完全削除"}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                }}
+                disabled={isDeleting}
+                className="py-2 px-4 text-red-500 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors"
+              >
+                {isDeleting ? "..." : "アーカイブ"}
+              </button>
+            )}
           </div>
         </div>
       )}

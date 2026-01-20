@@ -4,6 +4,8 @@ export interface Job {
   title: string;
   content: string;
   createdAt: Date | null;
+  isArchived: boolean;
+  isPinned: boolean;
 
   // 抽出された構造化データ
   companyName: string | null;

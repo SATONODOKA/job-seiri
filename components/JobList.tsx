@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, deleteDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Job } from "@/types/job";
 import JobCard from "./JobCard";
 import JobFilters, { FilterState } from "./JobFilters";
 
-type SortField = "createdAt" | "companyName" | "jobTitle" | "salaryMin";
+type SortField = "createdAt" | "companyName" | "jobTitle" | "salaryMin" | "salaryMax";
 type SortOrder = "asc" | "desc";
 
 export default function JobList() {
@@ -19,7 +19,12 @@ export default function JobList() {
     jobType: null,
     industry: null,
     salaryBand: null,
+    salaryMin: null,
+    salaryMax: null,
   });
+
+  const [showArchived, setShowArchived] = useState(false);
+  const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Firebaseの初期化確認
@@ -29,8 +34,11 @@ export default function JobList() {
       return;
     }
 
-    // リアルタイムリスナー
-    const q = query(collection(db, "jobs"), orderBy("createdAt", "desc"));
+    // リアルタイムリスナー（アーカイブ状態でフィルタリング）
+    const q = query(
+      collection(db, "jobs"),
+      orderBy("createdAt", "desc")
+    );
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -45,6 +53,7 @@ export default function JobList() {
               salaryBand: data.salaryBand,
               salaryMin: data.salaryMin,
               salaryMax: data.salaryMax,
+              isArchived: data.isArchived,
               hasContent: !!data.content,
               allFields: Object.keys(data)
             });
@@ -53,6 +62,8 @@ export default function JobList() {
             id: doc.id,
             ...data,
             createdAt: data.createdAt?.toDate() || null,
+            isArchived: data.isArchived ?? false,
+            isPinned: data.isPinned ?? false,
           } as Job;
         });
         setJobs(jobsData);
@@ -70,6 +81,9 @@ export default function JobList() {
   // フィルタリングとソート
   const filteredAndSortedJobs = useMemo(() => {
     let filtered = [...jobs];
+    
+    // アーカイブ状態でフィルタリング
+    filtered = filtered.filter((job) => job.isArchived === showArchived);
 
     // フィルタリング
     if (filters.jobType) {
@@ -80,6 +94,28 @@ export default function JobList() {
     }
     if (filters.salaryBand) {
       filtered = filtered.filter((job) => job.salaryBand === filters.salaryBand);
+    }
+    // 年収下限フィルタ（salaryMinまたはsalaryMaxの下限が指定値以上）
+    if (filters.salaryMin !== null) {
+      const minThreshold = filters.salaryMin * 10000; // 万円を円に変換
+      filtered = filtered.filter((job) => {
+        const jobMin = job.salaryMin;
+        const jobMax = job.salaryMax;
+        // salaryMinがある場合はそれを使用、ない場合はsalaryMaxを使用
+        const effectiveMin = jobMin ?? jobMax;
+        return effectiveMin !== null && effectiveMin >= minThreshold;
+      });
+    }
+    // 年収上限フィルタ（salaryMaxまたはsalaryMinの上限が指定値以下）
+    if (filters.salaryMax !== null) {
+      const maxThreshold = filters.salaryMax * 10000; // 万円を円に変換
+      filtered = filtered.filter((job) => {
+        const jobMax = job.salaryMax;
+        const jobMin = job.salaryMin;
+        // salaryMaxがある場合はそれを使用、ない場合はsalaryMinを使用
+        const effectiveMax = jobMax ?? jobMin;
+        return effectiveMax !== null && effectiveMax <= maxThreshold;
+      });
     }
 
     // ソート
@@ -100,6 +136,10 @@ export default function JobList() {
           aValue = a.salaryMin ?? 0;
           bValue = b.salaryMin ?? 0;
           break;
+        case "salaryMax":
+          aValue = a.salaryMax ?? 0;
+          bValue = b.salaryMax ?? 0;
+          break;
         case "createdAt":
         default:
           aValue = a.createdAt?.getTime() ?? 0;
@@ -113,7 +153,7 @@ export default function JobList() {
     });
 
     return filtered;
-  }, [jobs, filters, sortField, sortOrder]);
+  }, [jobs, filters, sortField, sortOrder, showArchived]);
 
   if (isLoading) {
     return (
@@ -123,18 +163,94 @@ export default function JobList() {
     );
   }
 
-  if (jobs.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-slate-400">まだ求人が登録されていません</p>
-      </div>
-    );
-  }
+  const handleSelectJob = (jobId: string, isSelected: boolean) => {
+    setSelectedJobIds(prev => {
+      const newSet = new Set(prev);
+      if (isSelected) {
+        newSet.add(jobId);
+      } else {
+        newSet.delete(jobId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedJobIds.size === filteredAndSortedJobs.length) {
+      setSelectedJobIds(new Set());
+    } else {
+      setSelectedJobIds(new Set(filteredAndSortedJobs.map(job => job.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedJobIds.size === 0) return;
+    if (!confirm(`選択した${selectedJobIds.size}件の求人を${showArchived ? '完全に削除' : 'アーカイブ'}しますか？`)) return;
+
+    if (!db) {
+      alert("Firebaseが初期化されていません。");
+      return;
+    }
+
+    try {
+      const firestoreDb = db; // TypeScriptの型チェックを通過させるため
+      const promises = Array.from(selectedJobIds).map(jobId => {
+        if (showArchived) {
+          // アーカイブから完全削除
+          return deleteDoc(doc(firestoreDb, "jobs", jobId));
+        } else {
+          // アーカイブに移動
+          return updateDoc(doc(firestoreDb, "jobs", jobId), { isArchived: true });
+        }
+      });
+      await Promise.all(promises);
+      setSelectedJobIds(new Set());
+    } catch (error) {
+      console.error("一括操作エラー:", error);
+      alert("操作に失敗しました");
+    }
+  };
 
   return (
     <div>
+      {/* タブ切り替え */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowArchived(false)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                !showArchived
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              求人一覧
+            </button>
+            <button
+              onClick={() => setShowArchived(true)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                showArchived
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              アーカイブ
+            </button>
+          </div>
+          {selectedJobIds.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              {showArchived ? '完全削除' : 'アーカイブ'} ({selectedJobIds.size}件)
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* フィルタ */}
-      <JobFilters jobs={jobs} onFilterChange={setFilters} />
+      <JobFilters jobs={jobs.filter(j => j.isArchived === showArchived)} onFilterChange={setFilters} />
 
       {/* ソート */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
@@ -148,7 +264,8 @@ export default function JobList() {
             <option value="createdAt">保存日</option>
             <option value="companyName">社名</option>
             <option value="jobTitle">役職名</option>
-            <option value="salaryMin">年収</option>
+            <option value="salaryMin">年収（下限）</option>
+            <option value="salaryMax">年収（上限）</option>
           </select>
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
@@ -159,15 +276,38 @@ export default function JobList() {
         </div>
       </div>
 
+      {/* 全選択チェックボックス */}
+      {filteredAndSortedJobs.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-3 mb-4 flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={selectedJobIds.size === filteredAndSortedJobs.length && filteredAndSortedJobs.length > 0}
+            onChange={handleSelectAll}
+            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+          />
+          <label className="text-sm text-slate-700">
+            {selectedJobIds.size > 0 ? `${selectedJobIds.size}件選択中` : 'すべて選択'}
+          </label>
+        </div>
+      )}
+
       {/* 求人リスト */}
       {filteredAndSortedJobs.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-slate-400">フィルタに一致する求人がありません</p>
+          <p className="text-slate-400">
+            {showArchived ? 'アーカイブされた求人はありません' : 'フィルタに一致する求人がありません'}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
           {filteredAndSortedJobs.map((job) => (
-            <JobCard key={job.id} job={job} />
+            <JobCard
+              key={job.id}
+              job={job}
+              isSelected={selectedJobIds.has(job.id)}
+              onSelectChange={(isSelected) => handleSelectJob(job.id, isSelected)}
+              showArchived={showArchived}
+            />
           ))}
         </div>
       )}
