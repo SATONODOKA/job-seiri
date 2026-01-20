@@ -53,7 +53,8 @@ export async function POST(request: Request) {
             : request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
         
         const rateLimitKey = `rate_limit:${clientId}`;
-        const rateLimitResult = await checkRateLimit(rateLimitKey, 10, 60000); // 10件/分
+        // レート制限: 30件/分（一気に15件保存しても問題ないように緩和）
+        const rateLimitResult = await checkRateLimit(rateLimitKey, 30, 60000);
         
         if (!rateLimitResult.allowed) {
             return NextResponse.json(
