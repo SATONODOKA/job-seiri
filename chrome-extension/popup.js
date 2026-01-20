@@ -264,10 +264,26 @@ function getPageInfo() {
 
 // 認証トークンを取得（chrome.storage.localから）
 async function getAuthToken() {
+  // chrome.storageが利用可能かチェック
+  if (!chrome || !chrome.storage || !chrome.storage.local) {
+    console.warn('chrome.storage.local is not available, returning null');
+    return null;
+  }
+
   return new Promise((resolve) => {
-    chrome.storage.local.get(['auth_token'], (result) => {
-      resolve(result.auth_token || null);
-    });
+    try {
+      chrome.storage.local.get(['auth_token'], (result) => {
+        if (chrome.runtime.lastError) {
+          console.error('Error getting auth token:', chrome.runtime.lastError);
+          resolve(null);
+        } else {
+          resolve(result.auth_token || null);
+        }
+      });
+    } catch (error) {
+      console.error('Error accessing chrome.storage.local:', error);
+      resolve(null);
+    }
   });
 }
 
