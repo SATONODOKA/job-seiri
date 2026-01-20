@@ -54,7 +54,7 @@
 
 プライバシーに関するお問い合わせは、以下までご連絡ください：
 
-- Email: [問い合わせ先メールアドレスを設定してください]
+- Email: satonodoka98@gmail.com
 - Web: https://kyujin-bookmark.netlify.app/support
 
 ## 8. プライバシーポリシーの変更
