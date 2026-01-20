@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { adminDbInstance } from "@/lib/firebaseAdmin";
+import { FieldValue } from "firebase-admin/firestore";
 import { extractWithGemini } from "@/lib/llm/providers/gemini";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { calculateJobPageScore } from "@/lib/jobPageDetector";
@@ -125,16 +125,14 @@ export async function POST(request: Request) {
             }
         }
 
-        // Firebaseの初期化確認
-        if (!db) {
-            console.error("Firebase初期化エラー: db is null");
+        // Firebase Adminの初期化確認
+        if (!adminDbInstance) {
+            console.error("Firebase Admin初期化エラー: adminDbInstance is null");
             console.error("環境変数チェック:", {
-                hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-                hasProjectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-                hasAuthDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+                hasServiceAccountKey: !!process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
             });
             return NextResponse.json(
-                { error: "Firebaseが初期化されていません。環境変数を確認してください。詳細はサーバーログを確認してください。" },
+                { error: "Firebase Adminが初期化されていません。FIREBASE_SERVICE_ACCOUNT_KEY環境変数を確認してください。詳細はサーバーログを確認してください。" },
                 { 
                     status: 500,
                     headers: getCorsHeaders()
@@ -175,14 +173,14 @@ export async function POST(request: Request) {
         console.log(`[Performance] LLM抽出処理時間: ${extractionTime}ms`);
         safeLog('[API] 最終抽出結果（Firestore保存前）:', extractedData);
 
-        // Firestoreにデータを追加
+        // Firestoreにデータを追加（Admin SDKを使用）
         console.log('[API] Firestoreにデータを保存開始...', { userId, url: validatedUrl, title });
-        const docRef = await addDoc(collection(db, "jobs"), {
+        const docRef = await adminDbInstance.collection("jobs").add({
             userId, // 認証済みユーザーのID（またはanonymous）
             url: validatedUrl,
             title,
             content: content || "",
-            createdAt: serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(),
             sourceHost: new URL(validatedUrl).hostname,
             isPinned: false,
             isArchived: false,

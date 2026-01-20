@@ -1,12 +1,11 @@
 /**
  * レート制限機能（Firestoreカウンタ方式）
- * サーバレス環境（Netlify）でも動作するように、Firestoreを使用
+ * サーバレス環境（Netlify）でも動作するように、Firestore Admin SDKを使用
  * 
  * 注意: 本番環境ではUpstash Redisの使用を推奨
  */
 
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { adminDbInstance } from "@/lib/firebaseAdmin";
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -26,21 +25,21 @@ export async function checkRateLimit(
   limit: number = 10,
   windowMs: number = 60000
 ): Promise<RateLimitResult> {
-  if (!db) {
-    // Firebaseが初期化されていない場合は許可（開発環境でのフォールバック）
-    console.warn("Firebase not initialized, allowing request");
+  if (!adminDbInstance) {
+    // Firebase Adminが初期化されていない場合は許可（開発環境でのフォールバック）
+    console.warn("Firebase Admin not initialized, allowing request");
     return { allowed: true, remaining: limit, resetAt: Date.now() + windowMs };
   }
 
   const now = Date.now();
-  const rateLimitDoc = doc(db, "rateLimits", key);
+  const rateLimitDocRef = adminDbInstance.collection("rateLimits").doc(key);
 
   try {
-    const snapshot = await getDoc(rateLimitDoc);
+    const snapshot = await rateLimitDocRef.get();
 
-    if (!snapshot.exists()) {
+    if (!snapshot.exists) {
       // 新しいレート制限レコードを作成
-      await setDoc(rateLimitDoc, {
+      await rateLimitDocRef.set({
         count: 1,
         resetAt: now + windowMs,
         createdAt: now,
@@ -53,12 +52,17 @@ export async function checkRateLimit(
     }
 
     const data = snapshot.data();
+    if (!data) {
+      // データが存在しない場合は許可
+      return { allowed: true, remaining: limit, resetAt: now + windowMs };
+    }
+
     const resetAt = data.resetAt || now + windowMs;
     const count = data.count || 0;
 
     // 時間窓が過ぎている場合はリセット
     if (now > resetAt) {
-      await updateDoc(rateLimitDoc, {
+      await rateLimitDocRef.update({
         count: 1,
         resetAt: now + windowMs,
       });
@@ -79,7 +83,7 @@ export async function checkRateLimit(
     }
 
     // カウントを増やす
-    await updateDoc(rateLimitDoc, {
+    await rateLimitDocRef.update({
       count: count + 1,
     });
 
