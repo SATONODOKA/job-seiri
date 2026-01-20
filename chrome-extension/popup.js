@@ -2,6 +2,57 @@
 // config.jsで定義された FIREBASE_CONFIG を利用可能ですが、
 // APIルート経由に変更したため、ここでは直接使用しません。
 
+// HTMLタグを除去してテキストのみを取得する関数
+function getCleanText(element) {
+  // まず、スクリプトとスタイルタグを除去したクローンを作成
+  const clone = element.cloneNode(true);
+  const scripts = clone.querySelectorAll('script, style, noscript');
+  scripts.forEach(el => el.remove());
+  
+  // innerTextを試す（レンダリングされたテキストを取得）
+  let text = clone.innerText || '';
+  
+  // innerTextが空またはHTMLタグが含まれている場合は、textContentを使用
+  if (!text || text.includes('<') || text.length < 10) {
+    text = clone.textContent || '';
+  }
+  
+  // まだHTMLタグが含まれている場合は、正規表現で除去
+  if (text.includes('<')) {
+    text = text.replace(/<[^>]*>/g, '');
+  }
+  
+  // 連続する空白や改行を整理
+  text = text.replace(/\s+/g, ' ').trim();
+  
+  return text;
+}
+
+// HTML構造から不要な要素を除去する関数
+function getCleanHTML(element) {
+  const clone = element.cloneNode(true);
+  
+  // スクリプト、スタイル、noscriptを除去
+  const toRemove = clone.querySelectorAll('script, style, noscript, iframe, embed, object');
+  toRemove.forEach(el => el.remove());
+  
+  // コメントを除去
+  const walker = document.createTreeWalker(
+    clone,
+    NodeFilter.SHOW_COMMENT,
+    null,
+    false
+  );
+  const comments = [];
+  let node;
+  while (node = walker.nextNode()) {
+    comments.push(node);
+  }
+  comments.forEach(comment => comment.remove());
+  
+  return clone.innerHTML;
+}
+
 // ページ情報を取得する関数（タブ内で実行される）
 function getPageInfo() {
   // 複数の候補セレクターを定義
@@ -17,7 +68,10 @@ function getPageInfo() {
     '[id*="job"]',
     'section',
     '.container',
-    '#container'
+    '#container',
+    'table', // テーブル構造のサイトにも対応
+    '[class*="detail"]',
+    '[class*="posting"]'
   ];
   
   // 各セレクターで要素を取得し、テキスト量を評価
@@ -28,12 +82,23 @@ function getPageInfo() {
     try {
       const elements = document.querySelectorAll(selector);
       elements.forEach(el => {
-        const textLength = el.innerText.trim().length;
+        // クリーンなテキストを取得して評価
+        const cleanText = getCleanText(el);
+        const textLength = cleanText.length;
+        
         // ナビゲーションやフッターを除外（テキストが短すぎる、またはリンクが多い）
         const linkCount = el.querySelectorAll('a').length;
         const linkRatio = linkCount / Math.max(textLength, 1);
-        // 最小500文字、リンク比率30%未満の要素を優先
-        if (textLength > maxTextLength && textLength > 500 && linkRatio < 0.3) {
+        
+        // HTMLタグが多く含まれている場合は除外（タグの比率が高い）
+        const htmlLength = el.innerHTML.length;
+        const tagRatio = (htmlLength - textLength) / Math.max(htmlLength, 1);
+        
+        // 最小500文字、リンク比率30%未満、タグ比率50%未満の要素を優先
+        if (textLength > maxTextLength && 
+            textLength > 500 && 
+            linkRatio < 0.3 && 
+            tagRatio < 0.5) {
           maxTextLength = textLength;
           bestElement = el;
         }
@@ -47,9 +112,9 @@ function getPageInfo() {
   // 最適な要素が見つからない場合はbodyを使用
   const contentElement = bestElement || document.body;
   
-  // テキストとHTML構造の両方を取得
-  const textContent = contentElement.innerText.trim();
-  const htmlContent = contentElement.innerHTML;
+  // クリーンなテキストとHTML構造を取得
+  const textContent = getCleanText(contentElement);
+  const htmlContent = getCleanHTML(contentElement);
   
   // メタデータも取得
   const metaTags = Array.from(document.querySelectorAll('meta')).map(meta => ({
@@ -61,7 +126,7 @@ function getPageInfo() {
     url: window.location.href,
     title: document.title,
     content: textContent.substring(0, 20000), // 文字数制限を緩和
-    htmlStructure: htmlContent.substring(0, 50000), // HTML構造も含める
+    htmlStructure: htmlContent.substring(0, 50000), // HTML構造も含める（クリーンアップ済み）
     metaTags: metaTags
   };
 }
