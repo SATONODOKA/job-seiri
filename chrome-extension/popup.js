@@ -4,20 +4,65 @@
 
 // ページ情報を取得する関数（タブ内で実行される）
 function getPageInfo() {
-  // メインコンテンツを探す
-  const main = document.querySelector('main')
-    || document.querySelector('article')
-    || document.querySelector('[class*="job"]')
-    || document.querySelector('[class*="content"]')
-    || document.querySelector('[class*="description"]')
-    || document.body;
-
-  const content = main.innerText.trim().substring(0, 10000);
-
+  // 複数の候補セレクターを定義
+  const candidateSelectors = [
+    'main',
+    'article',
+    '[role="main"]',
+    '[class*="job"]',
+    '[class*="content"]',
+    '[class*="description"]',
+    '[id*="content"]',
+    '[id*="main"]',
+    '[id*="job"]',
+    'section',
+    '.container',
+    '#container'
+  ];
+  
+  // 各セレクターで要素を取得し、テキスト量を評価
+  let bestElement = null;
+  let maxTextLength = 0;
+  
+  for (const selector of candidateSelectors) {
+    try {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(el => {
+        const textLength = el.innerText.trim().length;
+        // ナビゲーションやフッターを除外（テキストが短すぎる、またはリンクが多い）
+        const linkCount = el.querySelectorAll('a').length;
+        const linkRatio = linkCount / Math.max(textLength, 1);
+        // 最小500文字、リンク比率30%未満の要素を優先
+        if (textLength > maxTextLength && textLength > 500 && linkRatio < 0.3) {
+          maxTextLength = textLength;
+          bestElement = el;
+        }
+      });
+    } catch (e) {
+      // セレクターが無効な場合はスキップ
+      console.warn('Invalid selector:', selector, e);
+    }
+  }
+  
+  // 最適な要素が見つからない場合はbodyを使用
+  const contentElement = bestElement || document.body;
+  
+  // テキストとHTML構造の両方を取得
+  const textContent = contentElement.innerText.trim();
+  const htmlContent = contentElement.innerHTML;
+  
+  // メタデータも取得
+  const metaTags = Array.from(document.querySelectorAll('meta')).map(meta => ({
+    name: meta.getAttribute('name') || meta.getAttribute('property') || meta.getAttribute('itemprop'),
+    content: meta.getAttribute('content')
+  })).filter(m => m.name && m.content);
+  
   return {
     url: window.location.href,
     title: document.title,
-    content: content
+    content: textContent.substring(0, 20000), // 文字数制限を緩和
+    htmlStructure: htmlContent.substring(0, 50000), // HTML構造も含める
+    metaTags: metaTags
   };
 }
 

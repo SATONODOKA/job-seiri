@@ -15,7 +15,7 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
     try {
-        const { url, title, content } = await request.json();
+        const { url, title, content, htmlStructure, metaTags } = await request.json();
 
         if (!url || !title) {
             return NextResponse.json(
@@ -56,7 +56,9 @@ export async function POST(request: Request) {
         const extractedData = await extractWithGemini(
             validatedUrl,
             title,
-            content || ""
+            content || "",
+            htmlStructure || null,
+            metaTags || null
         );
         const extractionTime = Date.now() - extractionStart;
         console.log(`[Performance] LLM抽出処理時間: ${extractionTime}ms`);

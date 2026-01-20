@@ -32,7 +32,9 @@ export async function POST(request: Request) {
             const extractedData = await extractWithGemini(
                 jobData.url,
                 jobData.title,
-                jobData.content || ""
+                jobData.content || "",
+                jobData.htmlStructure || null,
+                jobData.metaTags || null
             );
 
             await updateDoc(jobDoc, {
@@ -72,7 +74,9 @@ export async function POST(request: Request) {
                     const extractedData = await extractWithGemini(
                         jobData.url || "",
                         jobData.title,
-                        jobData.content || ""
+                        jobData.content || "",
+                        jobData.htmlStructure || null,
+                        jobData.metaTags || null
                     );
 
                     await updateDoc(doc(db, "jobs", jobDoc.id), {

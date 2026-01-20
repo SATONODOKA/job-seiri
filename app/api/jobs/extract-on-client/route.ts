@@ -3,7 +3,7 @@ import { extractWithGemini } from "@/lib/llm/providers/gemini";
 
 export async function POST(request: Request) {
     try {
-        const { url, title, content } = await request.json();
+        const { url, title, content, htmlStructure, metaTags } = await request.json();
 
         if (!url || !title) {
             return NextResponse.json(
@@ -13,7 +13,13 @@ export async function POST(request: Request) {
         }
 
         // LLMで求人情報を抽出
-        const extractedData = await extractWithGemini(url, title, content || "");
+        const extractedData = await extractWithGemini(
+            url,
+            title,
+            content || "",
+            htmlStructure || null,
+            metaTags || null
+        );
 
         return NextResponse.json({
             success: true,
