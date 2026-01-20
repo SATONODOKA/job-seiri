@@ -47,3 +47,7 @@ next-env.d.ts
 # Chrome extension config (contains sensitive Firebase keys)
 chrome-extension/config.js
 
+# Firebase Admin SDK service account keys (contains sensitive credentials)
+*-firebase-adminsdk-*.json
+firebase-adminsdk-*.json
+
