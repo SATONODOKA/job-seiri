@@ -8,19 +8,23 @@ import { safeLog } from "@/lib/safeLog";
 import { verifyIdToken } from "@/lib/firebaseAdmin";
 
 export async function OPTIONS() {
-    // CORS制限（拡張機能IDを環境変数で指定）
+    return new NextResponse(null, {
+        headers: getCorsHeaders()
+    });
+}
+
+// CORSヘッダーを取得するヘルパー関数
+function getCorsHeaders() {
     const EXTENSION_ID = process.env.EXTENSION_ID;
     const allowedOrigin = EXTENSION_ID
         ? `chrome-extension://${EXTENSION_ID}`
         : '*'; // 開発環境のみ
-
-    return new NextResponse(null, {
-        headers: {
-            "Access-Control-Allow-Origin": allowedOrigin,
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        },
-    });
+    
+    return {
+        "Access-Control-Allow-Origin": allowedOrigin,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    };
 }
 
 export async function POST(request: Request) {
@@ -61,7 +65,10 @@ export async function POST(request: Request) {
                     error: "レート制限に達しました。しばらく待ってから再試行してください。",
                     resetAt: rateLimitResult.resetAt,
                 },
-                { status: 429 }
+                { 
+                    status: 429,
+                    headers: getCorsHeaders()
+                }
             );
         }
 
@@ -70,7 +77,10 @@ export async function POST(request: Request) {
         if (!url || !title) {
             return NextResponse.json(
                 { error: "URLとタイトルは必須です" },
-                { status: 400 }
+                { 
+                    status: 400,
+                    headers: getCorsHeaders()
+                }
             );
         }
 
@@ -82,7 +92,10 @@ export async function POST(request: Request) {
         } catch (error) {
             return NextResponse.json(
                 { error: "無効なURL形式です" },
-                { status: 400 }
+                { 
+                    status: 400,
+                    headers: getCorsHeaders()
+                }
             );
         }
 
@@ -104,7 +117,10 @@ export async function POST(request: Request) {
                         reasons,
                         canForceSave: true, // 強制保存可能フラグ
                     },
-                    { status: 400 }
+                    { 
+                        status: 400,
+                        headers: getCorsHeaders()
+                    }
                 );
             }
         }
@@ -119,7 +135,10 @@ export async function POST(request: Request) {
             });
             return NextResponse.json(
                 { error: "Firebaseが初期化されていません。環境変数を確認してください。詳細はサーバーログを確認してください。" },
-                { status: 500 }
+                { 
+                    status: 500,
+                    headers: getCorsHeaders()
+                }
             );
         }
 
@@ -135,7 +154,10 @@ export async function POST(request: Request) {
                     error: "AI解析のレート制限に達しました。しばらく待ってから再試行してください。",
                     resetAt: geminiRateLimitResult.resetAt,
                 },
-                { status: 429 }
+                { 
+                    status: 429,
+                    headers: getCorsHeaders()
+                }
             );
         }
 
@@ -190,21 +212,19 @@ export async function POST(request: Request) {
             success: true,
             id: docRef.id,
             pageType, // ページタイプを返す
+        }, {
+            headers: getCorsHeaders()
         });
-
-        // CORSヘッダーを追加（拡張機能IDを環境変数で指定）
-        const EXTENSION_ID = process.env.EXTENSION_ID;
-        const allowedOrigin = EXTENSION_ID
-            ? `chrome-extension://${EXTENSION_ID}`
-            : '*'; // 開発環境のみ
-        response.headers.set("Access-Control-Allow-Origin", allowedOrigin);
 
         return response;
     } catch (error) {
         console.error("API error:", error);
         return NextResponse.json(
             { error: error instanceof Error ? error.message : "サーバーエラーが発生しました" },
-            { status: 500 }
+            { 
+                status: 500,
+                headers: getCorsHeaders()
+            }
         );
     }
 }
